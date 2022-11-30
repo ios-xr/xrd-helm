@@ -1,0 +1,92 @@
+{{- /* Helper templates */ -}}
+{{- define "xrd.interfaces.multusCount" -}}
+{{- $c := 0 }}
+{{- range . }}
+  {{- if eq .type "multus" }}
+    {{- $c = add1 $c }}
+  {{- end }}
+{{- end }}
+{{- $c }}
+{{- end -}}
+
+{{- define "xrd.interfaces.anyMultus" -}}
+{{- /*
+Returns a string equivalent to boolean true if there are any multus interfaces,
+or an empty string otherwise.
+*/ -}}
+{{- $c := 0 }}
+{{- range concat .Values.interfaces .Values.mgmtInterfaces }}
+  {{- if eq .type "multus" }}
+1
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{- define "xrd.interfaces.checkDefaultCniCount" -}}
+{{- $c := 0 }}
+{{- range .Values.interfaces }}
+  {{- if eq .type "defaultCni" }}
+    {{- $c = add1 $c }}
+  {{- end }}
+{{- end }}
+{{- range .Values.mgmtInterfaces }}
+  {{- if eq .type "defaultCni" }}
+    {{- $c = add1 $c }}
+  {{- end }}
+{{- end }}
+{{- if gt $c 1 }}
+  {{- fail "At most one defaultCni inteface can be specified across both interfaces and mgmtInterfaces" }}
+{{- end }}
+{{- end -}}
+
+{{- define "xrd.interfaces.linuxflags" -}}
+{{- $flags := list }}
+{{- $base := list "type" "config" }}
+{{- range $k, $v := . -}}
+  {{- if and (eq $k "snoopIpv4Address") $v }}
+    {{- $flags = append $flags "snoop_v4" }}
+  {{- else if and (eq $k "snoopIpv4DefaultRoute") $v }}
+    {{- $flags = append $flags "snoop_v4_default_route" }}
+  {{- else if and (eq $k "snoopIpv6Address") $v }}
+    {{- $flags = append $flags "snoop_v6" }}
+  {{- else if and (eq $k "snoopIpv6DefaultRoute") $v }}
+    {{- $flags = append $flags "snoop_v6_default_route" }}
+  {{- else if and (eq $k "chksum") $v }}
+    {{- $flags = append $flags "chksum" }}
+  {{- else if eq $k "xrName" }}
+    {{- if not (and (kindIs "string" $v) $v) }}
+      {{- fail "If xrName is specified it must be a non-empty string" }}
+    {{- end }}
+    {{- $flags = append $flags (printf "xr_name=%s" $v) }}
+  {{- else if not (has $k $base) }}
+    {{- fail (printf "%s may not be specified for defaultCni or multus interfaces" $k) }}
+  {{- end }}
+{{- end }}
+{{- join "," $flags }}
+{{- end -}}
+
+{{- define "xrd.interfaces.pciflags" -}}
+{{- $flags := list }}
+{{- $base := list "type" "config" }}
+{{- range $k, $v := . -}}
+  {{- if not (has $k $base) }}
+    {{- fail (printf "%s may not be specified for pci interfaces" $k) }}
+  {{- end }}
+{{- end }}
+{{- join "," $flags }}
+{{- end -}}
+
+{{- define "xrd.podNetworkAnnotations" -}}
+{{- $nets := list }}
+{{- range $idx, $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
+  {{- if eq $intf.type "multus" }}
+    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $idx }}
+    {{- $entry := dict "name" $netname }}
+    {{- if $intf.attachmentConfig }}
+    {{- $entry = merge $entry $intf.attachmentConfig }}
+    {{- end }}
+    {{- $nets = append $nets $entry }}
+  {{- end }}
+{{- end }}
+{{- toPrettyJson $nets }}
+{{- end }}

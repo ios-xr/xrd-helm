@@ -1,0 +1,11 @@
+apiVersion: v2
+name: xrd-common
+description: Common helpers for Cisco IOS-XR XRd platforms
+type: library
+keywords:
+ - cisco
+ - ios-xr
+ - xrd
+sources:
+ - https://github.com/ios-xr/xrd-helm
+version: 1.0.0-beta.1

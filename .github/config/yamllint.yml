@@ -1,0 +1,25 @@
+---
+rules:
+  braces: enable
+  brackets: enable
+  colons: enable
+  commas: enable
+  comments:
+    require-starting-space: false
+    min-spaces-from-content: 2
+  comments-indentation:
+    level: warning
+  document-end: disable
+  document-start: disable
+  empty-lines: enable
+  hyphens: enable
+  indentation:
+    spaces: consistent
+    indent-sequences: whatever
+    check-multi-line-strings: false
+  key-duplicates: enable
+  new-line-at-end-of-file: enable
+  new-lines: enable
+  trailing-spaces: enable
+  truthy:
+    level: warning

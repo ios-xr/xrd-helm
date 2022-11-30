@@ -1,0 +1,269 @@
+# Default values for XRd vRouter.
+#
+# There are two required fields which have no defaults and must
+# be specified for all installations:
+# - image.repository
+# - image.tag
+
+# Image configuration
+image:
+  # Repository for the container image (required).
+  #repository: ""
+  # Image tag (required).
+  #tag: ""
+  # Pull policy for images.
+  # One of "IfNotPresent", "Always", or "Never"
+  # See https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+  pullPolicy: Always
+  # Image pull secrets.
+  # See https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  pullSecrets: []
+
+# Global configuration
+global:
+  # Labels to add to all deployed objects.
+  labels: {}
+
+  # Annotations to add to all deployed objects.
+  annotations: {}
+
+# Override the basename used for generated resources.
+#nameOverride: ""
+
+# Override the name used for generated resources.
+#fullnameOverride: ""
+
+# Labels to add to all deployed objects.
+commonLabels: {}
+
+# Annotations to add to all deployed objects.
+commonAnnotations: {}
+
+# Labels added to the XRd deployment.
+labels: {}
+
+# Annotations added to the XRd deployment.
+annotations: {}
+
+# Pod resource configuration.
+# See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+# The default resources are:
+#   - 5Gi memory request (unless a memory request/limit is specified here).
+#   - 3Gi hugepages-1Gi limit (and implicit request) (unless _any_ hugepage
+#     size request/limit is specified here).
+resources: {}
+# Example default resources for XRd vRouter:
+#  limits:
+#    hugepages-1Gi: 3Gi
+#  requests:
+#    memory: 5Gi
+
+# Security context for the XRd container.
+# Privileged mode is currently required for XRd in K8s due to device
+# access requirements.
+securityContext:
+  privileged: true
+
+# Use the host network namespace.
+hostNetwork: false
+
+# Location control for the XRd pod.
+# Standard K8s configuration, more information available at:
+# https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+# Node labels for pod assignment.
+nodeSelector: {}
+# List of node taints to tolerate.
+tolerations: []
+# Affinity for pod assignment.
+affinity: {}
+
+# Labels added to the XRd pod.
+podLabels: {}
+
+# Annotations added to the XRd pod.
+podAnnotations: {}
+
+# Persistent storage controls.
+persistence:
+  # Enable persistent storage.
+  enabled: false
+  # Persistent Volume size.
+  size: "6Gi"
+  # Persistent volume access modes.
+  accessModes:
+  - ReadWriteOnce
+  # Storage class for the persistent volume.
+  # This storage class must be defined separately.
+  # N.B Not specifying a storage class is not the same as specifying an
+  # empty string! (https://kubernetes.io/docs/concepts/storage/persistent-volumes/)
+  #storageClass: ""
+  # Bind to an existing Persistent Volume.
+  # If specified this must be a pre-existing PV that is not bound.
+  #existingVolume: ""
+  # Annotations added to the PVC.
+  annotations: {}
+  # Selector for the PVC.
+  #selector: {}
+  # Custom PVC data source.
+  #dataSource: {}
+  # Use an existing bound Persistent Volume Claim.
+  # If specified this must be a pre-existing PVC that is bound.
+  # This overrides any other settings in this section.
+  #existingClaim: ""
+
+# Extra volume definitions for the XRd pod.
+# These are added verbatim to the XRd pod volumes.
+extraVolumes: []
+
+# Extra volume mounts for the XRd container.
+# These are added verbatim to the XRd container volume mounts.
+extraVolumeMounts: []
+
+# Extra host path mounts for the XRd container.
+# This can be used to mount additional host paths into the container instead
+# of defining an extraVolumes entry and an extraVolumeMounts entry.
+extraHostPathMounts: []
+  # Unique name (required)
+  #- name: e810-driver
+  # Path from the host to mount in the container (required)
+  #hostPath: "/lib/firmware/intel/ice/ddp"
+  # Path to use as the mount point in the container (defaults to the same
+  # as the hostPath).
+  #mountPath: ""
+  # Flag indicating whether or not to create the directory if it doesn't
+  # exist at container start (default false).
+  #create: false
+
+# XR configuration and boot scripts.
+config:
+  # Username and password for the root system user.
+  # This field can be used instead of putting the user configuration in
+  # the ascii configuration below so values files can be distributed
+  # without username and password data.
+  # This MUST NOT clash with the ASCII config below!
+  # These must be specified together, i.e. both or neither must be specified.
+  #username: ""
+  #password: ""
+  # ASCII XR configuration to be applied on XR boot.
+  #ascii: ""
+  # Flag indicating when the above configuration should be applied:
+  #  - false indicates only on first boot.
+  #  - true indicates on every boot.
+  # Defaults to false (only first boot).
+  #asciiEveryBoot: false
+  # Contents of a script to run on XR boot.
+  #script: ""
+  # Flag indicating when the above script should be run:
+  #  - false indicates only on first boot.
+  #  - true indicates on every boot.
+  # Defaults to false (only first boot).
+  #scriptEveryBoot: false
+  # ZTP enable flag.
+  ztpEnable: false
+  # Contents of a custom ZTP ini file to use.
+  # This may only be set when the ztpEnable flag is set to 'true'
+  #ztpIni: ""
+
+# XRd interfaces.
+# These are split into two arrays:
+#  - An array of line interfaces: 'interfaces'
+#  - An array of management interfaces: 'mgmtInterfaces'
+#
+# Each of these is an array of interface objects.
+# Interfaces can be one of the following types:
+#  - defaultCni: This interface connects to the defaultCNI veth interface
+#                created in each pod.
+#                Only one interface of this type may be specified (across both
+#                interfaces and mgmtInterfaces).
+#                This can be specified as a mgmtInterface only.
+#  - multus:     This connects to an interface created using a CNI plugin,
+#                driven by the multus meta-CNI plugin.
+#                All of the network attachment definition configuration must be
+#                specified under the 'config' field for the interface.
+#                Any attachment annotation configuration may be specified under
+#                the 'attachmentConfig' field.
+#                This can be specified as a mgmtInterface only.
+#  - pci:        This connects to a PCI interface, or range of PCI interfaces.
+#                The configuration here is one of:
+#                - device: <address>, to use the single interface at the
+#                  given PCI address.
+#                - first: N, to use the first N network PCI devices.
+#                - last: N, to use the final N network PCI devices.
+#                This can be specified as a line interface only.
+#                N.B. If PCI interfaces are specified with "first" or "last",
+#                that must be the ONLY "pci" interface definition.
+#
+# On 'defaultCni' and 'multus' interfaces, the following options may also
+# be specified to control the interface behavior in XR:
+#   - chksum: Turn on TCP/UDP checksum calculation for ingress packets (to
+#             counteract checksum offload to hardware).
+#   - xrName: Customize the XR interface name for this interface.
+#   - snoopIpv4Address: see below.
+#   - snoopIpv4DefaultRoute: see below.
+#   - snoopIpv6Address: see below.
+#   - snoopIpv6Address: see below.
+# The snooping options find the named configuration item in the
+# container network namespace and apply that configuration into XR, e.g.
+# if snoopIpv4Address is specified, the IPv4 address for the underlying
+# linux interface is found, and XR configuration for that IPv4 address
+# on the corresponding XR interface is generated and applied on XRd startup.
+#
+# XRd line interfaces.
+interfaces: []
+# Example interfaces:
+#  config:
+#    device: 00.06.00:1
+#- type pci
+#  config:
+#    last: 3
+
+# XRd management interfaces.
+mgmtInterfaces: []
+# Example interfaces:
+#- type: defaultCni
+#  snoopIpv4Address: true
+#  snoopIpv4DefaultRoute: true
+#  chksum: true
+#- type: multus
+#  config:
+#    type: macvlan
+#    master: eth1
+#    mode: bridge
+#    ipam:
+#      type: static
+#  attachmentConfig:
+#    ips:
+#    - "10.0.0.1/24"
+
+# CPU settings.
+# More information about the CPU behavior of XRd vRouter can be found
+# here: @@@
+cpu: {}
+  # Override the cpuset to use for XRd.
+  # This must be a subset of the CPUs available for XRd to run on.
+  #cpuset: ""
+  # Override the number of CPUs used for control-plane threads from
+  # the pool of CPUs in the XRd cpuset.
+  #controlPlaneCpuCount: 2
+  # HyperThreading mode.
+  # This option must be used when the CPU has hyperthreading turned on
+  # in order to ensure the dataplane has whole physical CPU cores and prevent
+  # 'noisy neighbor' issues.
+  # This mode supports two values:
+  #  - 'off' - no hyperthreading (default)
+  #  - 'pairs' - where hyperthreaded siblings are consecutive, i.e.
+  #               * physical core 0 has logical cores 0 and 1
+  #               * physical core 1 has logical cores 2 and 3
+  #               * etc...
+  #hyperThreadingMode: "off"
+
+# PCI interface driver.
+# Two PCI drivers are supported:
+#  - 'vfio-pci' (default)
+#  - 'igb_uio'
+#pciDriver: "vfio-pci"
+
+# XRd advanced settings.
+# This section contains settings not required by most users.
+# Details can be found here: @@@
+advancedSettings: {}

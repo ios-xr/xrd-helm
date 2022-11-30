@@ -1,0 +1,41 @@
+#!/usr/bin/env bash
+# commit-check - Pre-commit checks
+
+set -e -o pipefail
+
+
+FAILURES=0
+
+
+echo "Running helm lint..."
+args=("--set" "image.repository=repository" "--set" "image.tag=latest")
+error=false
+for chart in charts/*; do
+    pushd "$chart"
+    if ! (helm dependency update && helm lint "${args[@]}"); then
+        error=true
+    fi
+    popd
+done
+if [ $error = true ]; then
+    FAILURES=$((FAILURES+1))
+    echo "helm lint failed, check output and fix errors" >&2
+fi
+
+
+echo
+echo "Running shellcheck..."
+if ! shellcheck scripts/{chart-releaser,commit-check}; then
+    echo "shellcheck failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
+
+
+echo
+if ((FAILURES > 0)); then
+    echo "ERROR: There were $FAILURES failures"
+    exit 1
+else
+    echo "SUCCESS: All passed!"
+    exit 0
+fi
