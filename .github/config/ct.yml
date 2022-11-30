@@ -1,1 +1,3 @@
+excluded-charts: xrd-common
+lint-conf: .github/config/yamllint.yml
 validate-maintainers: false
