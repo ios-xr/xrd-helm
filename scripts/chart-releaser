@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# chart-releaser - wrapper around helm/chart-releaser-action
+
+set -e
+
+
+trap 'rm -rf .cr*' ERR
+trap 'rm -rf .cr*' EXIT
+
+
+mkdir -p .cr
+curl -o .cr/cr.sh https://raw.githubusercontent.com/helm/chart-releaser-action/main/cr.sh
+chmod +x .cr/cr.sh
+
+
+RUNNER_TOOL_CACHE=.cr .cr/cr.sh "$@"

@@ -1,0 +1,41 @@
+{{- /*
+Set up the arguments for the common statefulset template and then invoke it.
+*/}}
+
+{{- /*
+Firstly, generate the resources for the XRd container, including any
+defaults if not overridden.
+XRd Control Plane has a default memory request of 2Gi.
+*/}}
+{{- $default := dict }}
+{{- $hasMemory := false }}
+{{- range $_, $settings := .Values.resources }}
+  {{- range $k := keys $settings }}
+    {{- if eq $k "memory" }}
+      {{- $hasMemory = true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+{{- $defaultLimits := dict }}
+{{- $defaultRequests := dict }}
+{{- if not $hasMemory }}
+  {{- $_ := set $defaultRequests "memory" "2Gi" }}
+{{- end }}
+{{- $_ := set $default "limits" $defaultLimits }}
+{{- $_ := set $default "requests" $defaultRequests }}
+
+{{- /* Generate the merged resources for the container */}}
+{{- $resources := dict }}
+{{- $resources = merge $resources .Values.resources $default }}
+
+{{- /*
+Set up the platform-specific environment variables.
+For XRd Control Plane this is only the interface specification.
+*/}}
+{{- $interfaces := include "xrd-cp.interfaces" . }}
+{{- $mgmtInterfaces := include "xrd-cp.mgmtInterfaces" . }}
+{{- $env := dict "XR_INTERFACES" $interfaces "XR_MGMT_INTERFACES" $mgmtInterfaces }}
+
+{{- /* Create the args dict and invoke the generic template. */}}
+{{- $args := dict "root" $ "resources" $resources "environment" $env }}
+{{- include "xrd.statefulset" $args -}}

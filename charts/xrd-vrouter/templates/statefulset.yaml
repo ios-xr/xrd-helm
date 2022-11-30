@@ -1,0 +1,80 @@
+{{- /*
+Set up the arguments for the common statefulset template and then invoke it.
+*/}}
+
+{{- /*
+Firstly, generate the resources for the XRd container, including any
+defaults if not overridden.
+XRd vRouter has a default memory request of 5Gi memory, and a default
+hugepages-1Gi limit (and implicit request) of 3Gi.
+Store any found or generated hugepage size for the env vars later on.
+*/}}
+{{- $default := dict }}
+
+{{- /* Check if any hugepage or memory configuration is specified. */}}
+{{- $hasHugepage := false }}
+{{- $hasMemory := false }}
+{{- $hugepageSize := "" }}
+{{- range $_, $settings := .Values.resources }}
+  {{- range $k := keys $settings }}
+    {{- if hasPrefix "hugepages" $k }}
+      {{- $hasHugepage = true }}
+      {{- $hugepageSize = get $settings $k }}
+    {{- end }}
+    {{- if eq $k "memory" }}
+      {{- $hasMemory = true }}
+    {{- end }}
+  {{- end }}
+{{- end }}
+
+{{- /*
+Construct the resources including the default if that resource wasn't specified.
+*/}}
+{{- $defaultLimits := dict }}
+{{- $defaultRequests := dict }}
+{{- if not $hasHugepage }}
+  {{- $_ := set $defaultLimits "hugepages-1Gi" "3Gi" }}
+  {{- $hugepageSize = "3Gi" }}
+{{- end }}
+{{- if not $hasMemory }}
+  {{- $_ := set $defaultRequests "memory" "5Gi" }}
+{{- end }}
+{{- $_ := set $default "limits" $defaultLimits }}
+{{- $_ := set $default "requests" $defaultRequests }}
+
+{{- /* Generate the merged resources for the container */}}
+{{- $resources := dict }}
+{{- $resources = merge $resources .Values.resources $default }}
+
+{{- /* Set up the platform-specific environment variables. */}}
+{{- $env := dict }}
+
+{{- /* Set the hugepage limit based on the resources */}}
+{{- $hugepageMb := include "xrd.toMiB" $hugepageSize }}
+{{- $_ := set $env "XR_VROUTER_DP_HUGEPAGE_MB" $hugepageMb  }}
+
+{{- /* Generate CPU env vars */}}
+{{- if .Values.cpu }}
+  {{- with .Values.cpu.cpuset }}
+    {{- $_ := set $env "XR_VROUTER_CPUSET" . }}
+  {{- end }}
+  {{- with .Values.cpu.controlPlaneCpuCount }}
+    {{- $_ := set $env "XR_VROUTER_CP_NUM_CPUS" . }}
+  {{- end }}
+  {{- with .Values.cpu.hyperThreadingMode }}
+    {{- $_ := set $env "XR_VROUTER_HT_MODE" . }}
+  {{- end }}
+{{- end }}
+
+{{- /* Generate the PCI driver env var */}}
+{{- if .Values.pciDriver }}
+  {{- $_ := set $env "XR_VROUTER_PCI_DRIVER" .Values.pciDriver }}
+{{- end }}
+
+{{- /* Generate the interface env vars */}}
+{{- $_ = set $env "XR_INTERFACES" (include "xrd-vr.interfaces" .) }}
+{{- $_ = set $env "XR_MGMT_INTERFACES" (include "xrd-vr.mgmtInterfaces" .) }}
+
+{{- /* Create the args dict and invoke the generic template. */}}
+{{- $args := dict "root" $ "resources" $resources "environment" $env }}
+{{- include "xrd.statefulset" $args -}}

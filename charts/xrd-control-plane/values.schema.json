@@ -1,0 +1,375 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "http://cisco.com/xrd/helm",
+  "title": "XRd Helm Chart Values",
+  "description": "Configuration values for XRd helm charts",
+  "type": "object",
+  "properties": {
+    "global": {
+      "description": "Global settings used by XRd definitions",
+      "type": "object",
+      "properties": {
+        "labels": {
+          "description": "Labels added to every resource",
+          "type": "object"
+        },
+        "annotations": {
+          "description": "Annotations added to every resource",
+          "type": "object"
+        }
+      }
+    },
+    "nameOverride": {
+      "description": "Override the basename used when naming generated resources",
+      "type": "string"
+    },
+    "fullnameOverride": {
+      "description": "Override the full name used when naming generated resources",
+      "type": "string"
+    },
+    "image": {
+      "description": "Container image config",
+      "type": "object",
+      "properties": {
+        "repository": {
+          "description": "Repository to pull the image from (required)",
+          "type": "string"
+        },
+        "tag": {
+          "description": "Image tag to pull from the repository (required)",
+          "type": "string"
+        },
+        "pullPolicy": {
+          "description": "Standard Kubernetes image pull policy",
+          "type": "string",
+          "default": "Always",
+          "enum": [
+            "Always",
+            "IfNotPresent",
+            "Never"
+          ]
+        },
+        "pullSecrets": {
+          "description": "Standard Kuberenetes pod imagePullSecrets array",
+          "type": "array"
+        }
+      },
+      "required": [
+        "repository",
+        "tag"
+      ],
+      "additionalProperties": false
+    },
+    "commonLabels": {
+      "description": "Labels added to every resource",
+      "type": "object"
+    },
+    "commonAnnotations": {
+      "description": "Annotations added to every resource",
+      "type": "object"
+    },
+    "labels": {
+      "description": "Labels added to the XRd deployment",
+      "type": "object"
+    },
+    "annotations": {
+      "description": "Annotations added to the XRd deployment",
+      "type": "object"
+    },
+    "resources": {
+      "description": "Standard Kubernetes container resources object",
+      "type": "object"
+    },
+    "securityContext": {
+      "description": "Standard Kubernetes container securityContext object",
+      "type": "object"
+    },
+    "hostNetwork": {
+      "description": "Flag indicating whether or not to use the host's network namespace",
+      "type": "boolean",
+      "default": false
+    },
+    "nodeSelector": {
+      "description": "Standard Kubernetes pod nodeSelector object",
+      "type": "object"
+    },
+    "tolerations": {
+      "description": "Standard Kubernetes pod tolerations array",
+      "type": "array"
+    },
+    "affinity": {
+      "description": "Standard Kubernetes pod affinity object",
+      "type": "object"
+    },
+    "podLabels": {
+      "description": "Labels added to the XRd pod",
+      "type": "object"
+    },
+    "podAnnotations": {
+      "description": "Annotations added to the XRd pod",
+      "type": "object"
+    },
+    "config": {
+      "description": "XRd configuration",
+      "type": "object",
+      "properties": {
+        "username": {
+          "description": "Username of a root user to add to the XR configuration",
+          "type": "string"
+        },
+        "password": {
+          "description": "Password for the root user (plaintext). Must be set if username is set",
+          "type": "string"
+        },
+        "ascii": {
+          "description": "ASCII XR configuration",
+          "type": "string"
+        },
+        "asciiEveryBoot": {
+          "description": "Flag indicating if the ASCII configuration should be applied on every boot (true), or just first boot (false)",
+          "type": "boolean",
+          "default": false
+        },
+        "script": {
+          "description": "XR boot script contents",
+          "type": "string"
+        },
+        "scriptEveryBoot": {
+          "description": "Flag indicating if the boot script should be run on every boot (true), or just first boot (false)",
+          "type": "boolean",
+          "default": false
+        },
+        "ztpEnable": {
+          "description": "Flag indicating if ZTP should be enabled",
+          "type": "boolean"
+        },
+        "ztpIni": {
+          "description": "Contents of a custom ZTP ini file to use. May only be set when ztpEnable is specified",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "persistence": {
+      "description": "Persistent storage settings",
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "description": "Enable persistent storage",
+          "type": "boolean",
+          "default": true
+        },
+        "size": {
+          "description": "Size of the persistent storage volume",
+          "type": "string",
+          "default": "6Gi"
+        },
+        "accessModes": {
+          "description": "Persistent Volume access modes",
+          "type": "array",
+          "item": {
+            "type": "string"
+          }
+        },
+        "storageClass": {
+          "description": "Storage class for the persistent volume",
+          "type": "string"
+        },
+        "existingVolume": {
+          "description": "Use an existing Persistent Volume which must be created manually",
+          "type": "string"
+        },
+        "annotations": {
+          "description": "Annotations added to the PVC",
+          "type": "object"
+        },
+        "selector": {
+          "description": "Selector label query for the PVC",
+          "type": "object"
+        },
+        "dataSource": {
+          "description": "Custom PVC data source",
+          "type": "object"
+        },
+        "existingClaim": {
+          "description": "Use an existing Persistent Volume Claim which must be created manually",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "extraVolumes": {
+      "description": "Extra volumes for the XRd pod",
+      "type": "array",
+      "item": {
+        "type": "object"
+      }
+    },
+    "extraVolumeMounts": {
+      "description": "Extra volume mounts for the XRd container",
+      "type": "array",
+      "item": {
+        "type": "object"
+      }
+    },
+    "extraHostPathMounts": {
+      "description": "Extra hostpath mounts for the XRd container",
+      "type": "array",
+      "item": {
+        "description": "Information for a single host mount",
+        "type": "object",
+        "properties": {
+          "name": {
+            "description": "Unique name for the host mount",
+            "type": "string"
+          },
+          "hostPath": {
+            "description": "Path on the host to mount in the container",
+            "type": "string"
+          },
+          "mountPath": {
+            "description": "Path in the container mount the host directory",
+            "type": "string"
+          },
+          "create": {
+            "description": "Flag indicating whether or not to create the directory if it's missing on the host",
+            "type": "boolean",
+            "default": false
+          }
+        },
+        "required": [
+          "hostPath"
+        ]
+      }
+    },
+    "interfaces": {
+      "description": "Line interface settings",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Underying interface type. One of: 'defaultCni' or 'multus'",
+            "type": "string",
+            "enum": [
+              "defaultCni",
+              "multus"
+            ]
+          },
+          "config": {
+            "description": "Type-dependent configuration",
+            "type": "object"
+          },
+          "attachmentConfig": {
+            "description": "Network attachment annotation configuration, for multus-type interfaces only",
+            "type": "object"
+          },
+          "snoopIpv4Address": {
+            "description": "Indicate whether to snoop the pre-existing IPv4 address of the interface into XR config",
+            "type": "boolean",
+            "default": false
+          },
+          "snoopIpv4DefaultRoute": {
+            "description": "Indicate whether snoop the pre-existing IPv4 default route of the interface into XR config",
+            "type": "boolean",
+            "default": false
+          },
+          "snoopIpv6Address": {
+            "description": "Flag indicating whether to snoop the pre-existing IPv6 address of the interface into XR config",
+            "type": "boolean",
+            "default": false
+          },
+          "snoopIpv6DefaultRoute": {
+            "description": "Flag indicating whether to snoop the pre-existing IPv6 default route of the interface into XR config",
+            "type": "boolean",
+            "default": false
+          },
+          "chksum": {
+            "description": "Flag indicating whether TCP/UDP checksums must be calculated for XRd for ingress packets to counteract checksum offload",
+            "type": "boolean",
+            "default": false
+          },
+          "xrName": {
+            "description": "Customize the XR interface name for this interface",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "mgmtInterfaces": {
+      "description": "Management interface settings",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "type": {
+            "description": "Underying interface type. One of: 'defaultCni' or 'multus'",
+            "type": "string",
+            "enum": [
+              "defaultCni",
+              "multus"
+            ]
+          },
+          "config": {
+            "description": "Type-dependent configuration",
+            "type": "object"
+          },
+          "attachmentConfig": {
+            "description": "Network attachment annotation configuration, for multus-type interfaces only",
+            "type": "object"
+          },
+          "snoopIpv4Address": {
+            "description": "Indicate whether to snoop the pre-existing IPv4 address of the interface into XR config",
+            "type": "boolean",
+            "default": false
+          },
+          "snoopIpv4DefaultRoute": {
+            "description": "Indicate whether snoop the pre-existing IPv4 default route of the interface into XR config",
+            "type": "boolean",
+            "default": false
+          },
+          "snoopIpv6Address": {
+            "description": "Flag indicating whether to snoop the pre-existing IPv6 address of the interface into XR config",
+            "type": "boolean",
+            "default": false
+          },
+          "snoopIpv6DefaultRoute": {
+            "description": "Flag indicating whether to snoop the pre-existing IPv6 default route of the interface into XR config",
+            "type": "boolean",
+            "default": false
+          },
+          "chksum": {
+            "description": "Flag indicating whether TCP/UDP checksums must be calculated for XRd for ingress packets to counteract checksum offload",
+            "type": "boolean",
+            "default": false
+          },
+          "xrName": {
+            "description": "Customize the XR interface name for this interface",
+            "type": "string"
+          }
+        },
+        "required": [
+          "type"
+        ],
+        "additionalProperties": false
+      }
+    },
+    "advancedSettings": {
+      "description": "Advanced settings for XRd not required for normal deployments",
+      "$comment": "XRd environment variables copied verbatim into the container environment",
+      "type": "object"
+    },
+    "xrd-common": {
+      "description": "Dummy placeholder for xrd-common subchart settings (never used)",
+      "type": "object"
+    }
+  },
+  "required": [
+    "image"
+  ],
+  "additionalProperties": false
+}
