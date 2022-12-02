@@ -1,1 +1,1 @@
-You have installed XRd vRouter version {{ .Values.tag }}.
+You have installed XRd vRouter version {{ .Values.image.tag }}.
