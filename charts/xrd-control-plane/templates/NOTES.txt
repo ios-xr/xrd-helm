@@ -1,1 +1,1 @@
-You have installed XRd Control Plane version {{ .Values.tag }}.
+You have installed XRd Control Plane version {{ .Values.image.tag }}.
