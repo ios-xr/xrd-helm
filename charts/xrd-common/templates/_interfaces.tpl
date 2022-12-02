@@ -35,7 +35,7 @@ or an empty string otherwise.
   {{- end }}
 {{- end }}
 {{- if gt $c 1 }}
-  {{- fail "At most one defaultCni inteface can be specified across both interfaces and mgmtInterfaces" }}
+  {{- fail "At most one defaultCni interface can be specified across both interfaces and mgmtInterfaces" }}
 {{- end }}
 {{- end -}}
 
@@ -43,16 +43,26 @@ or an empty string otherwise.
 {{- $flags := list }}
 {{- $base := list "type" "config" }}
 {{- range $k, $v := . -}}
-  {{- if and (eq $k "snoopIpv4Address") $v }}
-    {{- $flags = append $flags "snoop_v4" }}
-  {{- else if and (eq $k "snoopIpv4DefaultRoute") $v }}
-    {{- $flags = append $flags "snoop_v4_default_route" }}
-  {{- else if and (eq $k "snoopIpv6Address") $v }}
-    {{- $flags = append $flags "snoop_v6" }}
-  {{- else if and (eq $k "snoopIpv6DefaultRoute") $v }}
-    {{- $flags = append $flags "snoop_v6_default_route" }}
-  {{- else if and (eq $k "chksum") $v }}
-    {{- $flags = append $flags "chksum" }}
+  {{- if eq $k "snoopIpv4Address" }}
+    {{- if $v }}
+      {{- $flags = append $flags "snoop_v4" }}
+    {{- end }}
+  {{- else if eq $k "snoopIpv4DefaultRoute" }}
+    {{- if $v }}
+      {{- $flags = append $flags "snoop_v4_default_route" }}
+    {{- end }}
+  {{- else if eq $k "snoopIpv6Address" }}
+    {{- if $v }}
+      {{- $flags = append $flags "snoop_v6" }}
+    {{- end }}
+  {{- else if eq $k "snoopIpv6DefaultRoute" }}
+    {{- if $v }}
+      {{- $flags = append $flags "snoop_v6_default_route" }}
+    {{- end }}
+  {{- else if eq $k "chksum" }}
+    {{- if $v }}
+      {{- $flags = append $flags "chksum" }}
+    {{- end }}
   {{- else if eq $k "xrName" }}
     {{- if not (and (kindIs "string" $v) $v) }}
       {{- fail "If xrName is specified it must be a non-empty string" }}
