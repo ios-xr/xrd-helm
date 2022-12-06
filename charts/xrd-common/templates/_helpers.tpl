@@ -67,7 +67,7 @@ Common labels for immutable resources
 {{- include "xrd.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- with (merge .Values.commonLabels .Values.global.labels) }}
-{{- toYaml . }}
+{{ toYaml . }}
 {{- end }}
 {{- end -}}
 

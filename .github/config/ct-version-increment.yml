@@ -1,0 +1,7 @@
+# ct-version-increment.yml - Chart-testing configuration for version
+#                            increment checks.
+---
+check-version-increment: true
+validate-chart-schema: false
+validate-maintainers: false
+validate-yaml: false
