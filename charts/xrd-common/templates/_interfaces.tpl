@@ -41,7 +41,7 @@ or an empty string otherwise.
 
 {{- define "xrd.interfaces.linuxflags" -}}
 {{- $flags := list }}
-{{- $base := list "type" "config" }}
+{{- $base := list "type" "config" "attachmentConfig" }}
 {{- range $k, $v := . -}}
   {{- if eq $k "snoopIpv4Address" }}
     {{- if $v }}
