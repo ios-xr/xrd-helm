@@ -1,0 +1,35 @@
+#!/usr/bin/env python3
+# check-dependency-version-increment - Check the application charts depend on 
+#                                      the latest library chart version.
+
+"""Check the application charts depend on the latest library chart version."""
+
+import yaml
+from pathlib import Path
+
+
+# Determine the current 'xrd-common' library chart version.
+with open(Path.cwd() / "charts" / "xrd-common" / "Chart.yaml") as f:
+    data = yaml.safe_load(f)
+xrd_common_version = data["version"]
+
+
+for chart in {"xrd-control-plane", "xrd-vrouter"}:
+    # Check the 'xrd-common' dependency version is correct.
+    with open(Path.cwd() / "charts" / chart / "Chart.yaml") as f:
+        data = yaml.safe_load(f)
+
+    xrd_common_dependencies = [
+        dependency
+        for dependency in data["dependencies"]
+        if dependency["name"] == "xrd-common"
+    ]
+
+    # The dependency must exist.
+    assert len(xrd_common_dependencies) == 1
+
+    # The dependency version must match the current library chart version.
+    version = xrd_common_dependencies[0]["version"]
+    assert (
+        version == xrd_common_version
+    ), f"Chart '{chart}' requires 'xrd-common' dependency update from {version} to {xrd_common_version}"
