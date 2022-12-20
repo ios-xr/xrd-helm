@@ -2,6 +2,21 @@ apiVersion: v1
 entries:
   xrd-common:
   - apiVersion: v2
+    created: "2022-12-20T14:55:33.391268991Z"
+    description: Common helpers for Cisco IOS-XR XRd platforms
+    digest: 87939ab614349383280e5a0b5ef22e40172c03f17c282fc645f5946e0e1baf65
+    keywords:
+    - cisco
+    - ios-xr
+    - xrd
+    name: xrd-common
+    sources:
+    - https://github.com/ios-xr/xrd-helm
+    type: library
+    urls:
+    - https://github.com/ios-xr/xrd-helm/releases/download/xrd-common-1.0.1/xrd-common-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     created: "2022-12-06T18:01:07.216561697Z"
     description: Common helpers for Cisco IOS-XR XRd platforms
     digest: 491b53d87b8f0f13472bf46f01204708fad2bebdd7f6dbfec5d3659a22e30ab0
@@ -62,6 +77,25 @@ entries:
     - https://github.com/ios-xr/xrd-helm/releases/download/xrd-common-1.0.0-beta.1/xrd-common-1.0.0-beta.1.tgz
     version: 1.0.0-beta.1
   xrd-control-plane:
+  - apiVersion: v2
+    created: "2022-12-20T14:55:33.595681636Z"
+    dependencies:
+    - name: xrd-common
+      repository: file://../xrd-common
+      version: 1.0.1
+    description: Cisco IOS-XR XRd Control Plane platform
+    digest: a1636ed19a79b74a610af138e98c6f7abe549231302113c99b79e10b32ec904c
+    keywords:
+    - cisco
+    - ios-xr
+    - xrd
+    name: xrd-control-plane
+    sources:
+    - https://github.com/ios-xr/xrd-helm
+    type: application
+    urls:
+    - https://github.com/ios-xr/xrd-helm/releases/download/xrd-control-plane-1.0.1/xrd-control-plane-1.0.1.tgz
+    version: 1.0.1
   - apiVersion: v2
     created: "2022-12-06T18:01:07.409986231Z"
     dependencies:
@@ -140,6 +174,25 @@ entries:
     version: 1.0.0-beta.1
   xrd-vrouter:
   - apiVersion: v2
+    created: "2022-12-20T14:55:33.827126826Z"
+    dependencies:
+    - name: xrd-common
+      repository: file://../xrd-common
+      version: 1.0.1
+    description: Cisco IOS-XR XRd vRouter platform
+    digest: 0c7e8220cdb3b2fe84d324da6f10c971f6bb03bb82fe68de884c85cdaf22597a
+    keywords:
+    - cisco
+    - ios-xr
+    - xrd
+    name: xrd-vrouter
+    sources:
+    - https://github.com/ios-xr/xrd-helm
+    type: application
+    urls:
+    - https://github.com/ios-xr/xrd-helm/releases/download/xrd-vrouter-1.0.1/xrd-vrouter-1.0.1.tgz
+    version: 1.0.1
+  - apiVersion: v2
     created: "2022-12-06T18:01:07.58965835Z"
     dependencies:
     - name: xrd-common
@@ -215,4 +268,4 @@ entries:
     urls:
     - https://github.com/ios-xr/xrd-helm/releases/download/xrd-vrouter-1.0.0-beta.1/xrd-vrouter-1.0.0-beta.1.tgz
     version: 1.0.0-beta.1
-generated: "2022-12-06T18:01:07.589859356Z"
+generated: "2022-12-20T14:55:33.827203426Z"
