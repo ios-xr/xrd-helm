@@ -5,6 +5,11 @@
   "description": "Configuration values for XRd helm charts",
   "type": "object",
   "properties": {
+    "enabled": {
+        "description": "Allow this chart to be used as an optional subchart",
+        "type": "boolean",
+        "default": true
+    },
     "global": {
       "description": "Global settings used by XRd definitions",
       "type": "object",

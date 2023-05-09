@@ -23,7 +23,7 @@ data:
      password {{ .Values.config.password }}
     !
     {{- end }}
-    {{- .Values.config.ascii | default "" | nindent 4 }}
+    {{- tpl .Values.config.ascii . | default "" | nindent 4 }}
   {{- end }}
   {{- if .Values.config.script }}
   startup.sh: |
