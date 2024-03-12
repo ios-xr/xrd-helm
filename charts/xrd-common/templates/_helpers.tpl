@@ -93,3 +93,11 @@ Convert a k8s resource specification of Mi or Gi into MiB for XR env vars.
 {{ . | trimSuffix "Gi" | trim | int | mul 1024 | toString }}
 {{- end -}}
 {{- end -}}
+
+{{- define "xrd.hasConfig" -}}
+{{- $out := "false" }}
+{{- if or .Values.config.username .Values.config.ascii .Values.config.script .Values.config.ztpIni -}}
+{{- $out = "true" }}
+{{- end -}}
+{{ $out }}
+{{- end -}}

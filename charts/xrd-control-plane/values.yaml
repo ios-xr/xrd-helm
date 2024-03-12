@@ -101,7 +101,7 @@ persistence:
   # Selector for the PVC.
   #selector: {}
   # Custom PVC data source.
-  #dataSource: {}
+  # dataSource:
   # Use an existing bound Persistent Volume Claim.
   # If specified this must be a pre-existing PVC that is bound.
   # This overrides any other settings in this section.

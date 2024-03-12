@@ -1,6 +1,6 @@
 FROM bats/bats:1.9.0
 
-WORKDIR /chart
+WORKDIR /charts
 
 RUN echo "@community https://dl-cdn.alpinelinux.org/alpine/latest-stable/community" >> /etc/apk/repositories
 
