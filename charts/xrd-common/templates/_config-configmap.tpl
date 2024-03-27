@@ -15,9 +15,6 @@ data:
   {{- if or .Values.config.ascii .Values.config.username }}
   startup.cfg: |
     {{- if .Values.config.username }}
-      {{- if not .Values.config.password }}
-        {{- fail "password must be specified if username specified" }}
-      {{- end }}
     username {{ .Values.config.username }}
      group root-lr
      group cisco-support

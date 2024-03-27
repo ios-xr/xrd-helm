@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load "utils.bash"
+load "../utils.bash"
 
 export TEMPLATE_UNDER_TEST="templates/network-attachments.yaml"
 
@@ -65,13 +65,13 @@ setup_file () {
 
 @test "vRouter NetworkAttachmentDefinition: Check default config" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]'
-    assert_multiline_query_equal '.spec.config' \
+    assert_query_equal '.spec.config' \
         "{\n  \"cniVersion\": \"0.3.1\",\n  \"plugins\": [\n    null\n  ]\n}"
 }
 
 @test "vRouter NetworkAttachmentDefinition: Config can be set" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}}]'
-    assert_multiline_query_equal '.spec.config' \
+    assert_query_equal '.spec.config' \
         "{\n  \"cniVersion\": \"0.3.1\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
 }
 
@@ -104,7 +104,7 @@ setup_file () {
     assert_error_message_contains "type must be one of the following: \"defaultCni\", \"multus\""
 }
 
-@test "vRouter NetworkAttachmentDefinition: At most one MGMT interface can bn specified" {
+@test "vRouter NetworkAttachmentDefinition: At most one MGMT interface can be specified" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "multus"}, {"type": "multus"}]'
     assert_error_message_contains "Only one management interface can be specified on XRd vRouter"
 }

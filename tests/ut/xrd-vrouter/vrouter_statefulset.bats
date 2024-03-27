@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load "utils.bash"
+load "../utils.bash"
 
 export TEMPLATE_UNDER_TEST="templates/statefulset.yaml"
 
@@ -9,7 +9,7 @@ setup_file () {
     helm dependency update .
 }
 
-@test "vRouter StatefulSet: Name consists of the release name, template name and index" {
+@test "vRouter StatefulSet: Name consists of the release name and chart name" {
     template
     assert_query_equal '.metadata.name' "release-name-xrd-vrouter"
 }
@@ -82,7 +82,7 @@ setup_file () {
 
 @test "vRouter StatefulSet: Selector labels are set" {
     template
-    assert_multiline_query_equal '.spec.selector.matchLabels' \
+    assert_query_equal '.spec.selector.matchLabels' \
         "app.kubernetes.io/name: xrd-vrouter\napp.kubernetes.io/instance: release-name"
 }
 
@@ -99,7 +99,7 @@ setup_file () {
 
 @test "vRouter StatefulSet: .spec.template annotations are added for multus interfaces" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]'
-    assert_multiline_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
+    assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
         "[\n  {\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
 }
 
@@ -110,7 +110,7 @@ setup_file () {
 
 @test "vRouter StatefulSet: podNetworkAnnotations contain the desired information" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]'
-    assert_multiline_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
+    assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
         "[\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
 }
 
@@ -158,7 +158,7 @@ setup_file () {
     template --set 'config.username=foo' --set 'config.password=bar'
     assert_query_equal '.spec.template.spec.volumes[0].configMap.name' \
         "release-name-xrd-vrouter-config"
-    assert_multiline_query_equal '.spec.template.spec.volumes[0].configMap.items' \
+    assert_query_equal '.spec.template.spec.volumes[0].configMap.items' \
         "- key: startup.cfg\n  path: startup.cfg"
 }
 
@@ -166,7 +166,7 @@ setup_file () {
     template --set 'config.ascii=foo'
     assert_query_equal '.spec.template.spec.volumes[0].configMap.name' \
         "release-name-xrd-vrouter-config"
-    assert_multiline_query_equal '.spec.template.spec.volumes[0].configMap.items' \
+    assert_query_equal '.spec.template.spec.volumes[0].configMap.items' \
         "- key: startup.cfg\n  path: startup.cfg"
 }
 
@@ -174,7 +174,7 @@ setup_file () {
     template --set 'config.script=foo'
     assert_query_equal '.spec.template.spec.volumes[0].configMap.name' \
         "release-name-xrd-vrouter-config"
-    assert_multiline_query_equal '.spec.template.spec.volumes[0].configMap.items' \
+    assert_query_equal '.spec.template.spec.volumes[0].configMap.items' \
         "- key: startup.sh\n  path: startup.sh\n  mode: 0744"
 }
 
@@ -187,7 +187,7 @@ setup_file () {
     template --set 'config.ztpIni=foo' --set 'config.ztpEnable=true'
     assert_query_equal '.spec.template.spec.volumes[0].configMap.name' \
         "release-name-xrd-vrouter-config"
-    assert_multiline_query_equal '.spec.template.spec.volumes[0].configMap.items' \
+    assert_query_equal '.spec.template.spec.volumes[0].configMap.items' \
         "- key: ztp.ini\n  path: ztp.ini"
 }
 
@@ -467,8 +467,13 @@ setup_file () {
     assert_query_equal '.spec.template.spec.containers[0].env[1].value' "foo"
 }
 
-@test "vRouter StatefulSet: default container volumeMounts is set" {
+@test "vRouter StatefulSet: no container volumeMounts by default" {
     template
+    assert_query '.spec.template.spec.containers[0].volumeMounts[0] | not'
+}
+
+@test "vRouter StatefulSet: container volumeMounts is set if there is config" {
+    template --set 'config.ascii=foo'
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/xrd"
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "config"
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].readOnly' "true"
@@ -476,30 +481,30 @@ setup_file () {
 
 @test "vRouter StatefulSet: container volumeMounts for persistence is set if persistence is enabled" {
     template --set 'persistence.enabled=true'
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[1].mountPath' "/xr-storage"
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[1].name' "xr-storage"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/xr-storage"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "xr-storage"
 }
 
 @test "vRouter StatefulSet: container volumeMounts for extra host path mounts can be set with default mountPath" {
     template \
         --set 'extraHostPathMounts[0].name=foo' \
         --set 'extraHostPathMounts[0].hostPath=bar'
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[1].mountPath' "bar"
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[1].name' \
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "bar"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' \
         "release-name-xrd-vrouter-hostmount-foo"
 }
 
 @test "vRouter StatefulSet: container volumeMounts for extra host path mounts can be set with specified mountPath" {
     template --set-json 'extraHostPathMounts[0]={"name": "foo", "hostPath": "bar", "mountPath": "baz"}'
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[1].mountPath' "baz"
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[1].name' \
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "baz"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' \
         "release-name-xrd-vrouter-hostmount-foo"
 }
 
 @test "vRouter StatefulSet: extra container volumeMounts can be set" {
     template --set-json 'extraVolumeMounts[0]={"mountPath": "foo", "name": "bar"}'
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[1].mountPath' "foo"
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[1].name' "bar"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "foo"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "bar"
 }
 
 @test "vRouter StatefulSet: container imagePullSecrets can be set" {

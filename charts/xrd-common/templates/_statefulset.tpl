@@ -112,7 +112,7 @@ spec:
           {{- $envArgs := dict "root" . "platformEnv" $platformEnv }}
           {{- include "xrd.container-env" $envArgs | nindent 8 }}
         volumeMounts:
-        {{- if .Values.config }}
+        {{- if eq (include "xrd.hasConfig" $root) "true" }}
         - mountPath: /etc/xrd
           name: config
           readOnly: true

@@ -2,13 +2,13 @@ bats_load_library "bats-assert/load.bash"
 bats_load_library "bats-support/load.bash"
 
 cp_chart_dir () {
-    readlink -f "${BATS_TEST_DIRNAME}/../../xrd-control-plane"
+    readlink -f "${BATS_TEST_DIRNAME}/../../../charts/xrd-control-plane"
 }
 vrouter_chart_dir () {
-    readlink -f "${BATS_TEST_DIRNAME}/../../xrd-vrouter"
+    readlink -f "${BATS_TEST_DIRNAME}/../../../charts/xrd-vrouter"
 }
 common_chart_dir () {
-    readlink -f "${BATS_TEST_DIRNAME}/../../xrd-common"
+    readlink -f "${BATS_TEST_DIRNAME}/../../../charts/xrd-common"
 }
 
 template () {
@@ -54,19 +54,15 @@ template_failure_no_set () {
 }
 
 assert_query () {
-    assert "$(echo "$output" | yq -e "$1")" "$2"
+    assert "$(echo "$output" | yq -e "$1")"
 }
 
 assert_query_equal () {
-    assert_equal "$(echo "$output" | yq -e "$1")" "$2"
+    assert_equal "$(echo "$output" | yq -e "$1")" "$(echo -e "$2")"
 }
 
 assert_fields_equal () {
     assert_equal "$(echo "$output" | yq -e "$1")" "$(echo "$output" | yq -e "$2")"
-}
-
-assert_multiline_query_equal () {
-    assert_equal "$(echo "$output" | yq -e "$1")" "$(echo -e "$2")"
 }
 
 assert_error_message_contains () {
