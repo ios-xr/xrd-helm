@@ -23,7 +23,9 @@ data:
      password {{ .Values.config.password }}
     !
     {{- end }}
+    {{- if (get .Values.config "ascii") }}
     {{- tpl .Values.config.ascii . | default "" | nindent 4 }}
+    {{- end }}
   {{- end }}
   {{- if .Values.config.script }}
   startup.sh: |

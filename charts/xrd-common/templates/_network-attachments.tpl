@@ -1,6 +1,6 @@
 {{- define "xrd.network-attachments" -}}
 {{- range $idx, $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
-{{- if eq $intf.type "multus" }}
+{{- if or (eq $intf.type "multus") (eq $intf.type "sriov") }}
 ---
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
