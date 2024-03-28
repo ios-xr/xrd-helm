@@ -35,7 +35,7 @@ This template requires a dict as the argument with the following fields:
     {{- if .ztpEnable }}
       {{- $_ := set $gen "XR_ZTP_ENABLE" "1" }}
     {{- end }}
-    {{- if eq (include "xrd.hasConfig" $root) "true" }}
+    {{- if eq (include "xrd.hasConfig" .root) "true" }}
       {{- if or .ascii .username }}
         {{- $env := ternary "XR_EVERY_BOOT_CONFIG" "XR_FIRST_BOOT_CONFIG" (default false .asciiEveryBoot) }}
         {{- $_ := set $gen $env "/etc/xrd/startup.cfg" }}
