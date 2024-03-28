@@ -25,8 +25,7 @@ jobs:
           load: true
           tags: tests:latest
 
-      - name: "Start container"
-        id: start
+      - name: "Build container"
         run: |
           docker build tests/ -t helm-tests
 
@@ -37,8 +36,3 @@ jobs:
       - name: "Run vRouter unit tests"
         run: |
           docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
-
-      - name: "Stop container"
-        if: "${{ steps.start.conclusion == 'success' }}"
-        run: |
-          docker stop tests
