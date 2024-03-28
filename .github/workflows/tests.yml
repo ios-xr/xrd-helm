@@ -1,0 +1,38 @@
+name: tests
+
+on:
+  pull_request:
+    branches:
+      - "main"
+    paths:
+      - "charts/**"
+  push:
+    branches:
+      - "main"
+      - "gh-actions"
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: "tests"
+          load: true
+          tags: tests:latest
+
+      - name: "Build container"
+        run: |
+          docker build tests/ -t helm-tests
+
+      - name: "Run Control Plane unit tests"
+        run: |
+          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane
+
+      - name: "Run vRouter unit tests"
+        run: |
+          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter

@@ -7,8 +7,10 @@ kind: NetworkAttachmentDefinition
 metadata:
   name: {{ include "xrd.fullname" $ }}-{{ $idx }}
   namespace: {{ $.Release.Namespace }}
+  {{- if gt (len (include "xrd.commonAnnotations" $ | fromYaml)) 0 }}
   annotations:
     {{- include "xrd.commonAnnotations" $ | nindent 4 }}
+  {{- end }}
   labels:
     {{- include "xrd.commonLabels" $ | nindent 4 }}
 spec:
