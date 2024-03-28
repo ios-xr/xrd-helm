@@ -28,15 +28,15 @@ jobs:
       - name: "Start container"
         id: start
         run: |
-          docker build . -t helm-tests
+          docker build tests/ -t helm-tests
 
       - name: "Run Control Plane unit tests"
         run: |
-          docker run -v "$PWD/../:/charts" helm-tests bats tests/ut/xrd-control-plane
+          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane
 
       - name: "Run vRouter unit tests"
         run: |
-          docker run -v "$PWD/../:/charts" helm-tests bats tests/ut/xrd-vrouter
+          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
 
       - name: "Stop container"
         if: "${{ steps.start.conclusion == 'success' }}"
