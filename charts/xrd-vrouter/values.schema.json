@@ -257,8 +257,13 @@
             "description": "Underying interface type. Must be 'pci'",
             "type": "string",
             "enum": [
-              "pci"
+              "pci",
+              "sriov"
             ]
+          },
+          "resource": {
+            "description": "Network resource to use for the interface",
+            "type": "string"
           },
           "config": {
             "description": "Type-dependent configuration",
