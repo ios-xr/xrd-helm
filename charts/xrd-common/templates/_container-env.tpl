@@ -31,8 +31,11 @@ This template requires a dict as the argument with the following fields:
   {{- end }}
 
   {{- /* Generate config, script and ZTP env vars */}}
-  {{- if eq (include "xrd.hasConfig" .) "true" }}
-    {{- with .Values.config }}
+  {{- with .Values.config }}
+    {{- if .ztpEnable }}
+      {{- $_ := set $gen "XR_ZTP_ENABLE" "1" }}
+    {{- end }}
+    {{- if eq (include "xrd.hasConfig" $root) "true" }}
       {{- if or .ascii .username }}
         {{- $env := ternary "XR_EVERY_BOOT_CONFIG" "XR_FIRST_BOOT_CONFIG" (default false .asciiEveryBoot) }}
         {{- $_ := set $gen $env "/etc/xrd/startup.cfg" }}
@@ -41,13 +44,12 @@ This template requires a dict as the argument with the following fields:
         {{- $env := ternary "XR_EVERY_BOOT_SCRIPT" "XR_FIRST_BOOT_SCRIPT" (default false .scriptEveryBoot) }}
         {{- $_ := set $gen $env "/etc/xrd/startup.sh" }}
       {{- end }}
-      {{- if .ztpEnable }}
-        {{- $_ := set $gen "XR_ZTP_ENABLE" "1" }}
-        {{- if .ztpIni }}
+      {{- if .ztpIni }}
+        {{- if not .ztpEnable }}
+          {{- fail "ztpIni can only be specified if ztpEnable is set to true" }}
+        {{- else }}
           {{- $_ := set $gen "XR_ZTP_ENABLE_WITH_INI" "/etc/xrd/ztp.ini" }}
         {{- end }}
-      {{- else if .ztpIni }}
-        {{- fail "ztpIni can only be specified if ztpEnable is set to true" }}
       {{- end }}
     {{- end }}
   {{- end -}}
