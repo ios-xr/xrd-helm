@@ -36,7 +36,7 @@ spec:
     metadata:
       annotations:
         {{- include "xrd.commonAnnotations" . | nindent 8 }}
-        {{- if (include "xrd.interfaces.anyMultus" .) }}
+        {{- if or (include "xrd.interfaces.anyMultus" .) (include "xrd.interfaces.anySRIOV" .) }}
         k8s.v1.cni.cncf.io/networks: |-
           {{- include "xrd.podNetworkAnnotations" . | nindent 10 }}
         {{- end }}
@@ -87,6 +87,14 @@ spec:
           type: Directory
           {{- end }}
       {{- end }}
+      {{- if (include "xrd.interfaces.anySRIOV" .) }}
+      - name: net-stat
+        downwardAPI:
+          items:
+          - path: "net-stat"
+            fieldRef:
+              fieldPath: metadata.annotations['k8s.v1.cni.cncf.io/networks-status']
+      {{- end }}
       {{- if .Values.extraVolumes }}
       {{- toYaml .Values.extraVolumes | nindent 6 }}
       {{- end }}
@@ -123,6 +131,10 @@ spec:
         {{- end }}
         {{- if .Values.extraVolumeMounts }}
         {{- toYaml .Values.extraVolumeMounts | nindent 8 }}
+        {{- end }}
+        {{- if (include "xrd.interfaces.anySRIOV" .) }}
+        - mountPath: /etc/net-stat
+          name: net-stat
         {{- end }}
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:

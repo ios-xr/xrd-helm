@@ -2,6 +2,7 @@
 {{- /* Generate the XR_INTERFACES environment variable content */ -}}
 {{- $interfaces := list }}
 {{- $hasPci := 0 }}
+{{- $hasNetwork := 0 }}
 {{- $hasPciRange := 0 }}
 {{- $cniIndex := 0 }}
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
@@ -29,8 +30,8 @@
         {{- fail "Cannot specify both 'first' and 'last' for PCI interface" }}
       {{- end }}
       {{- $hasPciRange = 1 }}
-      {{- if $hasPci }}
-        {{- fail "If a pci interface range (i.e. with 'first' or 'last' config) is specified, no other pci interfaces may be specified" }}
+      {{- if or $hasPci $hasNetwork }}
+        {{- fail "If a pci interface range (i.e. with 'first' or 'last' config) is specified, no other pci interfaces (including networks) may be specified" }}
       {{- end }}
       {{- $config := "" }}
       {{- if .config.last }}
@@ -45,6 +46,23 @@
       {{- end }}
     {{- else }}
       {{- fail "Must specify one of 'device', 'first', or 'last' for PCI interfaces" }}
+    {{- end }}
+  {{- else if eq .type "sriov" }}
+    {{- if hasKey . "attachmentConfig" }}
+      {{- fail "attachmentConfig may not be specified for net-attach-def interface types" }}
+    {{- end }}
+    {{- $flags := include "xrd.interfaces.pciflags" . }}
+    {{- $hasNetwork = 1}}
+    {{- if $hasPciRange }}
+      {{- fail "If a pci interface range (i.e. with 'first' or 'last' config) is specified, no other pci interfaces (including networks) may be specified" }}
+    {{- end }}
+    {{- if not hasKey . "resource" }}
+      {{- fail "Resource must be specified for net-attach-def network types" }}
+    {{- end }}
+    {{- if $flags }}
+      {{- $interfaces = append $interfaces (printf "net-attach-def:%s,%s" .resource $flags) }}
+    {{- else }}
+      {{- $interfaces = append $interfaces (printf "net-attach-def:%s" .resource) }}
     {{- end }}
   {{- else }}
     {{- fail (printf "Invalid interface type %s" .type) }}

@@ -22,6 +22,19 @@ or an empty string otherwise.
 {{- end }}
 {{- end -}}
 
+{{- define "xrd.interfaces.anySRIOV" -}}
+{{- /*
+Returns a string equivalent to boolean true if there are any sriov network interfaces,
+or an empty string otherwise.
+*/ -}}
+{{- $c := 0 }}
+{{- range .Values.interfaces }}
+  {{- if eq .type "sriov" }}
+1
+  {{- end }}
+{{- end }}
+{{- end -}}
+
 {{- define "xrd.interfaces.checkDefaultCniCount" -}}
 {{- $c := 0 }}
 {{- range .Values.interfaces }}
@@ -95,6 +108,11 @@ or an empty string otherwise.
     {{- if $intf.attachmentConfig }}
     {{- $entry = merge $entry $intf.attachmentConfig }}
     {{- end }}
+    {{- $nets = append $nets $entry }}
+  {{- end }}
+  {{- if eq $intf.type "sriov" }}
+    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $idx }}
+    {{- $entry := dict "name" $netname }}
     {{- $nets = append $nets $entry }}
   {{- end }}
 {{- end }}
