@@ -16,11 +16,13 @@ kind: StatefulSet
 metadata:
   name: {{ include "xrd.fullname" . }}
   namespace: {{ .Release.Namespace }}
+  {{- if or (gt (len (include "xrd.commonAnnotations" . | fromYaml)) 0) .Values.annotations }}
   annotations:
     {{- include "xrd.commonAnnotations" . | nindent 4 }}
     {{- with .Values.annotations }}
     {{- toYaml . | nindent 4 }}
     {{- end }}
+  {{- end }}
   labels:
     {{- include "xrd.commonLabels" . | nindent 4 }}
     {{- with .Values.labels }}
@@ -35,7 +37,9 @@ spec:
   template:
     metadata:
       annotations:
+        {{- if gt (len (include "xrd.commonAnnotations" . | fromYaml)) 0}}
         {{- include "xrd.commonAnnotations" . | nindent 8 }}
+        {{- end }}
         {{- if (include "xrd.interfaces.anyMultus" .) }}
         k8s.v1.cni.cncf.io/networks: |-
           {{- include "xrd.podNetworkAnnotations" . | nindent 10 }}
@@ -53,24 +57,24 @@ spec:
       hostNetwork: true
       {{- end }}
       volumes:
-      {{- if .Values.config }}
+      {{- if eq (include "xrd.hasConfig" .) "true" }}
       - name: config
         configMap:
           name: {{ include "xrd.fullname" . }}-config
           items:
-            {{- if or .Values.config.username .Values.config.ascii }}
-            - key: startup.cfg
-              path: startup.cfg
-            {{- end }}
-            {{- if .Values.config.script }}
-            - key: startup.sh
-              path: startup.sh
-              mode: 0744
-            {{- end }}
-            {{- if .Values.config.ztpIni }}
-            - key: ztp.ini
-              path: ztp.ini
-            {{- end }}
+          {{- if or .Values.config.username .Values.config.ascii }}
+          - key: startup.cfg
+            path: startup.cfg
+          {{- end }}
+          {{- if .Values.config.script }}
+          - key: startup.sh
+            path: startup.sh
+            mode: 0744
+          {{- end }}
+          {{- if .Values.config.ztpIni }}
+          - key: ztp.ini
+            path: ztp.ini
+          {{- end }}
       {{- end }}
       {{- if and .Values.persistence.enabled .Values.persistence.existingClaim }}
       - name: xr-storage
@@ -108,7 +112,7 @@ spec:
           {{- $envArgs := dict "root" . "platformEnv" $platformEnv }}
           {{- include "xrd.container-env" $envArgs | nindent 8 }}
         volumeMounts:
-        {{- if .Values.config }}
+        {{- if eq (include "xrd.hasConfig" $root) "true" }}
         - mountPath: /etc/xrd
           name: config
           readOnly: true
@@ -126,7 +130,7 @@ spec:
         {{- end }}
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 6 }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -138,7 +142,7 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
-        {{- toYaml . | nindent 8 }}
+        {{- toYaml . | nindent 6 }}
       {{- end }}
       {{- with .Values.podSpecExtra }}
       {{- toYaml . | nindent 6 }}
@@ -148,11 +152,13 @@ spec:
   volumeClaimTemplates:
   - metadata:
       name: xr-storage
+      {{- if or (gt (len (include "xrd.commonAnnotations" $root | fromYaml)) 0) .annotations }}
       annotations:
         {{- include "xrd.commonAnnotations" $root | nindent 8 }}
         {{- if .annotations }}
-        {{- .annotations | nindent 8 }}
+        {{- toYaml .annotations | nindent 8 }}
         {{- end }}
+      {{- end }}
       labels:
         {{- include "xrd.commonImmutableLabels" $root | nindent 8 }}
     spec:
@@ -174,7 +180,7 @@ spec:
       {{- end }}
       {{- if .dataSource }}
       dataSource:
-        {{- .dataSource | nindent 8 }}
+        {{- toYaml .dataSource | nindent 8 }}
       {{- end }}
   {{- end }}
   {{- end }}

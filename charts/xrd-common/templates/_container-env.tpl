@@ -6,6 +6,7 @@ This template requires a dict as the argument with the following fields:
   - root: the root context
   - platformEnv: a dictionary of any platform-specific environment variables.
  */}}
+{{- $root := .root }}
 {{- $gen := dict }}
 
 {{- /* Merge the additional env vars */}}
@@ -32,23 +33,27 @@ This template requires a dict as the argument with the following fields:
 
   {{- /* Generate config, script and ZTP env vars */}}
   {{- with .Values.config }}
-    {{- if or .ascii .username }}
-      {{- $env := ternary "XR_EVERY_BOOT_CONFIG" "XR_FIRST_BOOT_CONFIG" (default false .asciiEveryBoot) }}
-      {{- $_ := set $gen $env "/etc/xrd/startup.cfg" }}
-    {{- end }}
-    {{- if .script }}
-      {{- $env := ternary "XR_EVERY_BOOT_SCRIPT" "XR_FIRST_BOOT_SCRIPT" (default false .scriptEveryBoot) }}
-      {{- $_ := set $gen $env "/etc/xrd/startup.sh" }}
-    {{- end }}
     {{- if .ztpEnable }}
       {{- $_ := set $gen "XR_ZTP_ENABLE" "1" }}
-      {{- if .ztpIni }}
-        {{- $_ := set $gen "XR_ZTP_ENABLE_WITH_INI" "/etc/xrd/ztp.ini" }}
-      {{- end }}
-    {{- else if .ztpIni }}
-      {{- fail "ztpIni can only be specified if ztpEnable is set to true" }}
     {{- end }}
-  {{- end }}
+    {{- if eq (include "xrd.hasConfig" $root) "true" }}
+      {{- if or .ascii .username }}
+        {{- $env := ternary "XR_EVERY_BOOT_CONFIG" "XR_FIRST_BOOT_CONFIG" (default false .asciiEveryBoot) }}
+        {{- $_ := set $gen $env "/etc/xrd/startup.cfg" }}
+      {{- end }}
+      {{- if .script }}
+        {{- $env := ternary "XR_EVERY_BOOT_SCRIPT" "XR_FIRST_BOOT_SCRIPT" (default false .scriptEveryBoot) }}
+        {{- $_ := set $gen $env "/etc/xrd/startup.sh" }}
+      {{- end }}
+      {{- if .ztpIni }}
+        {{- if not .ztpEnable }}
+          {{- fail "ztpIni can only be specified if ztpEnable is set to true" }}
+        {{- else }}
+          {{- $_ := set $gen "XR_ZTP_ENABLE_WITH_INI" "/etc/xrd/ztp.ini" }}
+        {{- end }}
+      {{- end }}
+    {{- end }}
+  {{- end -}}
 
   {{- /*
   Any explicit values in the advanced settings override values generated
