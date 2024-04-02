@@ -113,7 +113,7 @@ Convert a k8s resource specification of Mi or Gi into MiB for XR env vars.
   {{- $config := dict "cniVersion" "0.3.1" }}
   {{- if .config }}
     {{- if .config.type }}
-      {{- if not has .config.type $allowed_types}}
+      {{- if not (has .config.type $allowed_types) }}
         {{- fail "boo"}}
       {{- end }}
     {{- end }}
