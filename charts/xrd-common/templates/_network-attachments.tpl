@@ -36,26 +36,8 @@ metadata:
   labels:
     {{- include "xrd.commonLabels" $ | nindent 4 }}
 spec:
-  config1:
+  config:
   {{- include "xrd.sriovConfig" $intf | toYaml | nindent 2 }}
-  config: |-
-    {
-      "cniVersion": "0.3.1",
-      "name": "{{ include "xrd.fullname" $ }}-{{ $idx }}",
-      {{- if not (and $intf.config $intf.config.type) }}
-      "type": "host-device",
-      {{- end }}
-      {{- if $intf.config }}
-      {{- if not ($intf.config.ipam) }}
-      "ipam": {},
-      {{- end }}
-      "plugins": [
-        {{- $intf.config | toPrettyJson | nindent 8 }}
-      ]
-      {{- else }}
-      "ipam": {}
-      {{- end }}
-    }
 ...
 {{- end }}
 {{- end -}}
