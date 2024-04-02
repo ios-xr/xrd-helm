@@ -99,6 +99,17 @@ or an empty string otherwise.
 {{- join "," $flags }}
 {{- end -}}
 
+{{- define "xrd.interfaces.netattachdefflags" -}}
+{{- $flags := list }}
+{{- $base := list "type" "config" "resource" }}
+{{- range $k, $v := . -}}
+  {{- if not (has $k $base) }}
+    {{- fail (printf "%s may not be specified for net-attach-def interfaces" $k) }}
+  {{- end }}
+{{- end }}
+{{- join "," $flags }}
+{{- end -}}
+
 {{- define "xrd.podNetworkAnnotations" -}}
 {{- $nets := list }}
 {{- range $idx, $intf := concat .Values.interfaces .Values.mgmtInterfaces }}

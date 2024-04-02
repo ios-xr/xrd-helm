@@ -40,9 +40,6 @@ spec:
     {
       "cniVersion": "0.3.1",
       "name": "{{ include "xrd.fullname" $ }}-{{ $idx }}",
-      "type": "sriov",
-      "vlan": 0,
-      "vlanQoS": 0,
       "ipam": {}
     }
 ...

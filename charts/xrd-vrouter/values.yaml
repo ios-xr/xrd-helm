@@ -191,7 +191,12 @@ config:
 #                - last: N, to use the final N network PCI devices.
 #                This can be specified as a line interface only.
 #                N.B. If PCI interfaces are specified with "first" or "last",
-#                that must be the ONLY "pci" interface definition.
+#                that must be the ONLY "pci" or "net-attach-def" interface
+#                definition.
+#  - net-attach-def: This connects an additional network created from a SR-IOV
+#                network resource pool using a CNI plugin, driven by the multus
+#                meta-CNI plugin.
+#                This can be specified as a line interface only.
 #
 # On 'defaultCni' and 'multus' interfaces, the following options may also
 # be specified to control the interface behavior in XR:
