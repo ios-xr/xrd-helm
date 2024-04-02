@@ -36,7 +36,7 @@ metadata:
   labels:
     {{- include "xrd.commonLabels" $ | nindent 4 }}
 spec:
-  {{- include "xrd.sriovConfig" $intf | nindent 2 }}
+  {{- include "xrd.sriovConfig" $intf | toPrettyJson | nindent 2 }}
   config: |-
     {
       "cniVersion": "0.3.1",
