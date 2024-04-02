@@ -48,7 +48,7 @@ spec:
       "ipam": {},
       {{- end }}
       "plugins": [
-        {{- $intf.config | toPrettyJson | nindent 6 }}
+        {{- $intf.config | toPrettyJson | nindent 8 }}
       ]
       {{- else }}
       "ipam": {}
