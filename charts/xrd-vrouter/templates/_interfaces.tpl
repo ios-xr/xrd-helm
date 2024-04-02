@@ -55,7 +55,7 @@
     {{- if $hasPciRange }}
       {{- fail "If a pci interface range (i.e. with 'first' or 'last' config) is specified, no other pci interfaces (including networks) may be specified" }}
     {{- end }}
-    {{- if not hasKey . "resource" }}
+    {{- if not (hasKey . "resource") }}
       {{- fail "Resource must be specified for net-attach-def network types" }}
     {{- end }}
     {{- if $flags }}
