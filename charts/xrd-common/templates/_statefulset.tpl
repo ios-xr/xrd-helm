@@ -92,12 +92,12 @@ spec:
           {{- end }}
       {{- end }}
       {{- if (include "xrd.interfaces.anySRIOV" .) }}
-      - name: net-stat
-        downwardAPI:
+      - downwardAPI:
           items:
-          - path: "net-stat"
-            fieldRef:
-              fieldPath: metadata.annotations['k8s.v1.cni.cncf.io/networks-status']
+          - fieldRef:
+              fieldPath: metadata.annotations['k8s.v1.cni.cncf.io/network-status']
+          path: net-stat
+        name: net-stat
       {{- end }}
       {{- if .Values.extraVolumes }}
       {{- toYaml .Values.extraVolumes | nindent 6 }}
