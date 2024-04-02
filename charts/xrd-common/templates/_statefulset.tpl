@@ -96,7 +96,7 @@ spec:
           items:
           - fieldRef:
               fieldPath: metadata.annotations['k8s.v1.cni.cncf.io/network-status']
-          path: net-stat
+            path: net-stat
         name: net-stat
       {{- end }}
       {{- if .Values.extraVolumes }}
