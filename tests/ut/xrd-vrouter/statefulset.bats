@@ -80,6 +80,16 @@ setup_file () {
     assert_fields_equal '.spec.serviceName' '.metadata.name'
 }
 
+@test "vRouter StatefulSet: No serviceAccountName by default" {
+    template
+    assert_query '.spec.serviceAccountName | not'
+}
+
+@test "vRouter StatefulSet: serviceAccountName can be set" {
+    template --set 'serviceAccountName=foo'
+    assert_query_equal '.spec.template.spec.serviceAccountName' "foo"
+}
+
 @test "vRouter StatefulSet: Selector labels are set" {
     template
     assert_query_equal '.spec.selector.matchLabels' \
@@ -109,9 +119,10 @@ setup_file () {
 }
 
 @test "vRouter StatefulSet: podNetworkAnnotations contain the desired information" {
-    template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]'
+    template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "baz"}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
-        "[\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
+        "[\n  {\n    \"name\": \"release-name-xrd-vrouter-0\"\n  },\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-vrouter-1\"\n  }\n]"
 }
 
 @test "vRouter StatefulSet: .spec.template recommended labels are set" {
@@ -231,6 +242,14 @@ setup_file () {
     template --set 'extraVolumes[0].name=foo'
     assert_query_equal '.spec.template.spec.volumes[0].name' "foo"
 }
+
+@test "vRouter StatefulSet: downwardAPI volume is set if sriov network" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '.spec.template.spec.volumes[0].name' "network-status-annotation"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].fieldRef.fieldPath' "metadata.annotations['k8s.v1.cni.cncf.io/network-status']"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "network-status-annotation"
+}
+
 
 @test "vRouter: Image repository must be specified" {
     template_failure_no_set --set 'image.tag=latest'
@@ -359,13 +378,18 @@ setup_file () {
 }
 
 @test "vRouter StatefulSet: XR_INTERFACES container env vars is correctly set" {
-    template --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}}, {"type": "pci", "config": {"device": "11:11.1"}}]'
+    template --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}}, {"type": "sriov", "resource": "foo/bar"}]'
     assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "pci:00:00.0;pci:11:11.1"
+    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "pci:00:00.0;net-attach-def:default/release-name-xrd-vrouter-1"
 }
 
-@test "vRouter StatefulSet: XR_INTERFACES doesn't support any flags currently" {
+@test "vRouter StatefulSet: pci  XR_INTERFACES don't support any flags currently" {
     template_failure --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}, "chksum": true}]'
+    assert_error_message_contains "Additional property chksum is not allowed"
+}
+
+@test "vRouter StatefulSet: sriov XR_INTERFACES don't support any flags currently" {
+    template_failure --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "chksum": true}]'
     assert_error_message_contains "Additional property chksum is not allowed"
 }
 
@@ -413,6 +437,26 @@ setup_file () {
 @test "vRouter StatefulSet: don't set unsupported flags XR_MGMT_INTERFACES" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "multus", "foo": "bar"}]'
     assert_error_message_contains "Additional property foo is not allowed"
+}
+
+@test "vRouter StatefulSet: XR_NETWORK_STATUS_ANNOTATION_PATH is not set by default" {
+    # There are four env vars by default, so we check that there is not a fifth
+    template
+    assert_query '.spec.template.spec.containers[0].env[4] | not'
+}
+
+@test "vRouter StatefulSet: XR_NETWORK_STATUS_ANNOTATION_PATH is set when there is an sriov network" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_NETWORK_STATUS_ANNOTATION_PATH"
+    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "/etc/network-status/network-status-annotation"
+}
+
+@test "vRouter StatefulSet: XR_NETWORK_STATUS_ANNOTATION_PATH can be overridden" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
+        --set 'networkStatusDir=/bar' \
+        --set 'networkStatusFilename=baz'
+    assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_NETWORK_STATUS_ANNOTATION_PATH"
+    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "/bar/baz"
 }
 
 @test "vRouter StatefulSet: XR_DISK_USAGE_LIMIT is set if persistence is enabled with default value" {
@@ -505,6 +549,20 @@ setup_file () {
     template --set-json 'extraVolumeMounts[0]={"mountPath": "foo", "name": "bar"}'
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "foo"
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "bar"
+}
+
+@test "vRouter StatefulSet: network-status annotation is mounted if there is sriov network" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/network-status"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "network-status-annotation"
+}
+
+@test "vRouter StatefulSet: network-status annotation mount point can be overridden" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
+        --set 'networkStatusDir=/bar' \
+        --set 'networkStatusFilename=baz'
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/bar"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "baz"
 }
 
 @test "vRouter StatefulSet: container imagePullSecrets can be set" {

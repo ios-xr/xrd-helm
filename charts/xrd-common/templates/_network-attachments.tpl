@@ -32,11 +32,14 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   annotations:
     k8s.v1.cni.cncf.io/resourceName: {{ $intf.resource }}
+    {{- if gt (len (include "xrd.commonAnnotations" $ | fromYaml)) 0 }}
     {{- include "xrd.commonAnnotations" $ | nindent 4 }}
+    {{- end }}
   labels:
     {{- include "xrd.commonLabels" $ | nindent 4 }}
 spec:
-  config: {{- include "xrd.sriovConfig" $intf | toYaml | nindent 2 }}
+  config: |-
+  {{- include "xrd.sriovConfig" $intf | nindent 4}}
 ...
 {{- end }}
 {{- end -}}

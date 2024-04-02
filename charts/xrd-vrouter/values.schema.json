@@ -81,6 +81,10 @@
       "description": "Annotations added to the XRd deployment",
       "type": "object"
     },
+    "serviceAccountName": {
+      "description": "Name of the service account to use for the XRd pod",
+      "type": "string"
+    },
     "resources": {
       "description": "Standard Kubernetes container resources object",
       "type": "object"
@@ -217,6 +221,16 @@
         "type": "object"
       }
     },
+    "networkStatusDir": {
+      "description": "Directory to store network status file",
+      "type": "string",
+      "default": "/etc/network-status"
+    },
+    "networkStatusFilename": {
+      "description": "Filename for network status file",
+      "type": "string",
+      "default": "network-status-annotation"
+    },
     "extraHostPathMounts": {
       "description": "Extra hostpath mounts for the XRd container",
       "type": "array",
@@ -254,7 +268,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. Must be 'pci'",
+            "description": "Underlying interface type. Must be 'pci' or 'sriov'",
             "type": "string",
             "enum": [
               "pci",
@@ -283,7 +297,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. One of: 'defaultCni' or 'multus'",
+            "description": "Underlying interface type. One of: 'defaultCni' or 'multus'",
             "type": "string",
             "enum": [
               "defaultCni",
