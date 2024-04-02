@@ -113,9 +113,6 @@ Convert a k8s resource specification of Mi or Gi into MiB for XR env vars.
 {{- if .config }}
 {{- merge $config (.config | toPrettyJson) }}
 {{- end }}
-{{- if not (and .config .config.ipam) }}
-{{- $config = set $config "ipam" {} }}
-{{- end }}
 {{- if not (and .config .config.type) }}
 {{- $config = set $config "type" "host-device" }}
 {{- end }}
