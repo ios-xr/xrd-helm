@@ -58,7 +58,7 @@
     {{- if not (hasKey . "resource") }}
       {{- fail "Resource must be specified for net-attach-def network types" }}
     {{- end }}
-    {{- $interfaces = append $interfaces (printf "net-attach-def:%s-%s" (include "xrd.fullname" $) $idx ) }}
+    {{- $interfaces = append $interfaces (printf "net-attach-def:%s-%d" (include "xrd.fullname" $) $idx ) }}
   {{- else }}
     {{- fail (printf "Invalid interface type %s" .type) }}
   {{- end }}
