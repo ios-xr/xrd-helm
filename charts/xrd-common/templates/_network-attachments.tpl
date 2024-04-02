@@ -36,12 +36,13 @@ metadata:
   labels:
     {{- include "xrd.commonLabels" $ | nindent 4 }}
 spec:
+  {{- include "xrd.sriovConfig" $intf | nindent 2 }}
   config: |-
     {
       "cniVersion": "0.3.1",
       "name": "{{ include "xrd.fullname" $ }}-{{ $idx }}",
       {{- if not (and $intf.config $intf.config.type) }}
-      "type": "sriov",
+      "type": "host-device",
       {{- end }}
       {{- if $intf.config }}
       {{- if not ($intf.config.ipam) }}
