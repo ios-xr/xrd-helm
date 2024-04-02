@@ -43,13 +43,15 @@ spec:
       {{- if not (and $intf.config $intf.config.type) }}
       "type": "sriov",
       {{- end }}
-      {{- if not (and $intf.config $intf.config.ipam) }}
+      {{- if $intf.config }}
+      {{- if not ($intf.config.ipam) }}
       "ipam": {},
       {{- end }}
-      {{- if $intf.config }}
       "plugins": [
         {{- $intf.config | toPrettyJson | nindent 6 }}
       ]
+      {{- else }}
+      "ipam": {}
       {{- end }}
     }
 ...
