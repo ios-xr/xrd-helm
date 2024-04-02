@@ -58,11 +58,7 @@
     {{- if not (hasKey . "resource") }}
       {{- fail "Resource must be specified for net-attach-def network types" }}
     {{- end }}
-    {{- if $flags }}
-      {{- $interfaces = append $interfaces (printf "net-attach-def:%s,%s" .resource $flags) }}
-    {{- else }}
-      {{- $interfaces = append $interfaces (printf "net-attach-def:%s" .resource) }}
-    {{- end }}
+    {{- $interfaces = append $interfaces (printf "net-attach-def:%s" .resource) }}
   {{- else }}
     {{- fail (printf "Invalid interface type %s" .type) }}
   {{- end }}
