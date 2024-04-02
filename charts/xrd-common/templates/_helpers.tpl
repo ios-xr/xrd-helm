@@ -108,7 +108,7 @@ Convert a k8s resource specification of Mi or Gi into MiB for XR env vars.
 {{ $out }}
 {{- end -}}
 
-{{- define xrd.sriovConfig" -}}
+{{- define "xrd.sriovConfig" -}}
 {{- $config := dict "cniVersion" "0.3.1" }}
 {{- if .config }}
 {{- merge $config (.config | toPrettyJson) }}
