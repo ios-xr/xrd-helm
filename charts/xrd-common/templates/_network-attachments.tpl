@@ -43,8 +43,7 @@ spec:
       "type": "sriov",
       "vlan": 0,
       "vlanQoS": 0,
-      "ipam": |-
-        {}
+      "ipam": {}
     }
 ...
 {{- end }}
