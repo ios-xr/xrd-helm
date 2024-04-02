@@ -110,7 +110,7 @@ Convert a k8s resource specification of Mi or Gi into MiB for XR env vars.
 
 {{- /*
 Generate config for CNI used by sriov-type networks.
-/* -}}
+*/ -}}
 {{- define "xrd.sriovConfig" -}}
 {{- $allowed_types := list "sriov" "host-device" }}
 {{- $config := dict "cniVersion" "0.3.1" "type" "host-device" }}
