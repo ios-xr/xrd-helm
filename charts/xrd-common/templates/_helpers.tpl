@@ -114,13 +114,11 @@ Generate config for CNI used by sriov-type networks.
 {{- define "xrd.sriovConfig" -}}
 {{- $allowed_types := list "sriov" "host-device" }}
 {{- $config := dict "cniVersion" "0.3.1" "type" "host-device" }}
-{{- if .config }}
-  {{- if .config.type }}
+  {{- if (and .config .config.type) }}
     {{- if not (has .config.type $allowed_types) }}
       {{- fail "config.type must be one of: sriov, host-device" }}
     {{- end }}
   {{- end }}
   {{- $config = merge .config $config }}
-{{- end }}
 {{- $config | toPrettyJson }}
 {{- end -}}
