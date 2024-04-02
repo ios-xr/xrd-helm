@@ -36,7 +36,7 @@ metadata:
   labels:
     {{- include "xrd.commonLabels" $ | nindent 4 }}
 spec:
-  config1: |-
+  config1:
   {{- include "xrd.sriovConfig" $intf | toYaml | nindent 2 }}
   config: |-
     {
