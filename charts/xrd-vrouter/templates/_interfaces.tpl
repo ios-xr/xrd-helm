@@ -51,7 +51,6 @@
     {{- if hasKey . "attachmentConfig" }}
       {{- fail "attachmentConfig may not be specified for net-attach-def interface types" }}
     {{- end }}
-    {{- $flags := include "xrd.interfaces.pciflags" . }}
     {{- $hasNetwork = 1}}
     {{- if $hasPciRange }}
       {{- fail "If a pci interface range (i.e. with 'first' or 'last' config) is specified, no other pci interfaces (including networks) may be specified" }}
