@@ -6,7 +6,7 @@
 {{- $hasPciRange := 0 }}
 {{- $cniIndex := 0 }}
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
-{{- range .Values.interfaces }}
+{{- range $idx, $intf := .Values.interfaces }}
   {{- if eq .type "pci" }}
     {{- if hasKey . "attachmentConfig" }}
       {{- fail "attachmentConfig may not be specified for PCI interfaces" }}
@@ -58,7 +58,7 @@
     {{- if not (hasKey . "resource") }}
       {{- fail "Resource must be specified for net-attach-def network types" }}
     {{- end }}
-    {{- $interfaces = append $interfaces (printf "net-attach-def:%s" .resource) }}
+    {{- $interfaces = append $interfaces (printf "net-attach-def:%s" ({{ include "xrd.fullname" $ }}-{{ $idx }})) }}
   {{- else }}
     {{- fail (printf "Invalid interface type %s" .type) }}
   {{- end }}
