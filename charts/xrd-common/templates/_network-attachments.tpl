@@ -40,10 +40,10 @@ spec:
     {
       "cniVersion": "0.3.1",
       "name": "{{ include "xrd.fullname" $ }}-{{ $idx }}",
-      {{- if not or $intf.config $intf.config.type }}
+      {{- if not (and $intf.config $intf.config.type) }}
       "type": "sriov",
       {{- end }}
-      {{- if not or $intf.config $intf.config.ipam }}
+      {{- if not (and $intf.config $intf.config.ipam) }}
       "ipam": {},
       {{- end }}
       "plugins": [
