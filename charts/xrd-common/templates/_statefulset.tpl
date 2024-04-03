@@ -31,7 +31,6 @@ metadata:
 spec:
   replicas: 1
   serviceName: {{ include "xrd.fullname" . }}
-  serviceAccountName: default2
   selector:
     matchLabels:
       {{- include "xrd.selectorLabels" . | nindent 6 }}
@@ -54,6 +53,7 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      serviceAccountName: default2
       {{- if .Values.hostNetwork }}
       hostNetwork: true
       {{- end }}
