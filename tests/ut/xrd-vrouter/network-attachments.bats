@@ -139,7 +139,7 @@ setup_file () {
 @test "vRouter NetworkAttachmentDefinition (sriov): Config can be set" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"bar": "baz"}}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"host-device\",\n  \"bar\": \"baz\"\n}"
+        "{\n  \"bar\": \"baz\"\n,\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"host-device\"}"
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): CNI type can be overridden" {
@@ -150,13 +150,19 @@ setup_file () {
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Only sriov or host-device CNI are supported" {
     template_failure --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "foo"}}]'
-    assert_error_message_contains "abcde"
+    assert_error_message_contains "config.type for sriov interfaces must be one of: sriov, host-device."
+}
+
+@test "vRouter NetworkAttachmentDefinition: multiple sriov interfaces can be created together" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"},{"type": "sriov", "resource": "bar"}]'
+    assert_query_equal '.metadata.name' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"host-device\",\n  \"bar\": \"baz\"\n}"
 }
 
 @test "vRouter NetworkAttachmentDefinition: sriov interfaces and multus mgmt interfaces can be created together" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
         --set-json 'mgmtInterfaces=[{"type": "multus"}]'
-    assert_query_equal '.spec.config' \
+    assert_query_equal '.metadata.name' \
         "{\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"host-device\",\n  \"bar\": \"baz\"\n}"
 }
 
