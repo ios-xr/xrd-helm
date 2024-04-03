@@ -137,8 +137,8 @@ spec:
         {{- toYaml .Values.extraVolumeMounts | nindent 8 }}
         {{- end }}
         {{- if (include "xrd.interfaces.anySRIOV" .) }}
-        - mountPath: /etc/net-stat
-          name: net-stat
+        - mountPath: /etc/xrd
+          name: net-stat-annotation
         {{- end }}
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
