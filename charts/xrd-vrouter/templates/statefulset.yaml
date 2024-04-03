@@ -75,7 +75,7 @@ Construct the resources including the default if that resource wasn't specified.
 {{- $_ = set $env "XR_INTERFACES" (include "xrd-vr.interfaces" .) }}
 {{- $_ = set $env "XR_MGMT_INTERFACES" (include "xrd-vr.mgmtInterfaces" .) }}
 {{- if (include "xrd.interfaces.anySRIOV" .) }}
-  {{- $_ = set $env "XR_NETWORK_STATUS_ANNOTATION_PATH" "/etc/pod-networks/net-stat-annotation" }}
+  {{- $_ = set $env "XR_NETWORK_STATUS_ANNOTATION_PATH" "/etc/net-stat/net-stat" }}
 {{- end }}
 
 {{- /* Create the args dict and invoke the generic template. */}}
