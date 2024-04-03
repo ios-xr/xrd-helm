@@ -99,12 +99,12 @@ or an empty string otherwise.
 {{- join "," $flags }}
 {{- end -}}
 
-{{- define "xrd.interfaces.netattachdefflags" -}}
+{{- define "xrd.interfaces.sriovflags" -}}
 {{- $flags := list }}
 {{- $base := list "type" "config" "resource" }}
 {{- range $k, $v := . -}}
   {{- if not (has $k $base) }}
-    {{- fail (printf "%s may not be specified for net-attach-def interfaces" $k) }}
+    {{- fail (printf "%s may not be specified for sriov interfaces" $k) }}
   {{- end }}
 {{- end }}
 {{- join "," $flags }}

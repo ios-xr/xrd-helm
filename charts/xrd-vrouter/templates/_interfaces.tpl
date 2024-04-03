@@ -11,6 +11,9 @@
     {{- if hasKey . "attachmentConfig" }}
       {{- fail "attachmentConfig may not be specified for PCI interfaces" }}
     {{- end }}
+    {{- if hasKey . "resource" }}
+      {{- fail "resource may not be specified for PCI interfaces" }}
+    {{- end }}
     {{- $flags := include "xrd.interfaces.pciflags" . }}
     {{- if $hasPciRange }}
       {{- fail "If a pci interface range (i.e. with 'first' or 'last' config) is specified, no other pci interfaces may be specified" }}
@@ -31,7 +34,7 @@
       {{- end }}
       {{- $hasPciRange = 1 }}
       {{- if or $hasPci $hasNetwork }}
-        {{- fail "If a pci interface range (i.e. with 'first' or 'last' config) is specified, no other pci interfaces (including networks) may be specified" }}
+        {{- fail "If a pci interface range (i.e. with 'first' or 'last' config) is specified, no other pci or sriov interfaces may be specified" }}
       {{- end }}
       {{- $config := "" }}
       {{- if .config.last }}
@@ -49,15 +52,15 @@
     {{- end }}
   {{- else if eq .type "sriov" }}
     {{- if hasKey . "attachmentConfig" }}
-      {{- fail "attachmentConfig may not be specified for net-attach-def interface types" }}
+      {{- fail "attachmentConfig may not be specified for sriov interface types" }}
     {{- end }}
-    {{- $flags := include "xrd.interfaces.netattachdefflags" . }}
+    {{- $flags := include "xrd.interfaces.sriovflags" . }}
     {{- $hasNetwork = 1}}
     {{- if $hasPciRange }}
-      {{- fail "If a pci interface range (i.e. 'pci' type with 'first' or 'last' config) is specified, no other pci interfaces (including networks) may be specified" }}
+      {{- fail "If a pci interface range (i.e. 'pci' type with 'first' or 'last' config) is specified, no other pci or sriov interfaces may be specified" }}
     {{- end }}
     {{- if not (hasKey . "resource") }}
-      {{- fail "Resource must be specified for net-attach-def network types" }}
+      {{- fail "Resource must be specified for sriov interface types" }}
     {{- end }}
     {{- if $flags }}
       {{- $interfaces = append $interfaces (printf "net-attach-def:%s/%s-%d,%s" $.Release.Namespace (include "xrd.fullname" $) $idx $flags) }}

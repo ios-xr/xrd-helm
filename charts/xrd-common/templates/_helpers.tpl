@@ -117,7 +117,7 @@ Generate config for CNI used by sriov-type networks.
 {{- if .config }}
   {{- if .config.type }}
     {{- if not (has .config.type $allowed_types) }}
-      {{- fail "config.type must be one of: sriov, host-device" }}
+      {{- fail "config.type for sriov interfaces must be one of: sriov, host-device." }}
     {{- end }}
   {{- end }}
   {{- $config = merge .config $config }}
