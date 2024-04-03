@@ -109,7 +109,8 @@ setup_file () {
 }
 
 @test "vRouter StatefulSet: podNetworkAnnotations contain the desired information" {
-    template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]'
+    template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "baz"}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
         "[\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
 }
@@ -231,6 +232,14 @@ setup_file () {
     template --set 'extraVolumes[0].name=foo'
     assert_query_equal '.spec.template.spec.volumes[0].name' "foo"
 }
+
+@test "vRouter StatefulSet: downwardAPI volume is set if sriov network" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '.spec.template.spec.volumes[0].name' "foo"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].fieldRef.fieldPath' "foo"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "foo"
+}
+
 
 @test "vRouter: Image repository must be specified" {
     template_failure_no_set --set 'image.tag=latest'
@@ -503,6 +512,12 @@ setup_file () {
 
 @test "vRouter StatefulSet: extra container volumeMounts can be set" {
     template --set-json 'extraVolumeMounts[0]={"mountPath": "foo", "name": "bar"}'
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "foo"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "bar"
+}
+
+@test "vRouter StatefulSet: net-stat annotation is mounted if there is sriov network" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "foo"
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "bar"
 }
