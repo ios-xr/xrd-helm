@@ -32,7 +32,7 @@ metadata:
   namespace: {{ $.Release.Namespace }}
   annotations:
     k8s.v1.cni.cncf.io/resourceName: {{ $intf.resource }}
-    {{- include "xrd.commonAnnotations" $ | nindent 4 }}
+    {{- include "xrd.commonAnnotations" $ | nindent 4 -}}
   labels:
     {{- include "xrd.commonLabels" $ | nindent 4 }}
 spec:
