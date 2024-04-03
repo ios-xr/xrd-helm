@@ -96,7 +96,7 @@ spec:
           items:
           - fieldRef:
               fieldPath: metadata.annotations['k8s.v1.cni.cncf.io/network-status']
-            path: xrd
+            path: pot-networks
         name: net-stat-annotation
       {{- end }}
       {{- if .Values.extraVolumes }}
@@ -137,7 +137,7 @@ spec:
         {{- toYaml .Values.extraVolumeMounts | nindent 8 }}
         {{- end }}
         {{- if (include "xrd.interfaces.anySRIOV" .) }}
-        - mountPath: /etc/xrd
+        - mountPath: /etc/pod-networks
           name: net-stat-annotation
         {{- end }}
       {{- with .Values.image.pullSecrets }}
