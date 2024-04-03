@@ -254,7 +254,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. Must be 'pci'",
+            "description": "Underlying interface type. Must be 'pci' or 'sriov'",
             "type": "string",
             "enum": [
               "pci",
@@ -283,7 +283,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. One of: 'defaultCni' or 'multus'",
+            "description": "Underlying interface type. One of: 'defaultCni' or 'multus'",
             "type": "string",
             "enum": [
               "defaultCni",
