@@ -112,7 +112,7 @@ setup_file () {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]' \
         --set-json 'interfaces=[{"type": "sriov", "resource": "baz"}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
-        "[\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
+        "[\n  {\n    \"name\": \"release-name-xrd-vrouter-0\"\n  },\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-vrouter-1\"\n  }\n]"
 }
 
 @test "vRouter StatefulSet: .spec.template recommended labels are set" {
@@ -235,9 +235,9 @@ setup_file () {
 
 @test "vRouter StatefulSet: downwardAPI volume is set if sriov network" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_query_equal '.spec.template.spec.volumes[0].name' "foo"
-    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].fieldRef.fieldPath' "foo"
-    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "foo"
+    assert_query_equal '.spec.template.spec.volumes[0].name' "net-stat-annotation"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].fieldRef.fieldPath' "metadata.annotations['k8s.v1.cni.cncf.io/network-status']"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "xrd"
 }
 
 
@@ -518,8 +518,8 @@ setup_file () {
 
 @test "vRouter StatefulSet: net-stat annotation is mounted if there is sriov network" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "foo"
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "bar"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/xrd"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "net-stat-annotation"
 }
 
 @test "vRouter StatefulSet: container imagePullSecrets can be set" {
