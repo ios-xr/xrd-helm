@@ -368,9 +368,9 @@ setup_file () {
 }
 
 @test "vRouter StatefulSet: XR_INTERFACES container env vars is correctly set" {
-    template --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}}, {"type": "pci", "config": {"device": "11:11.1"}}]'
+    template --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}}, {"type": "sriov", "resource": "foo/bar"}]'
     assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "pci:00:00.0;pci:11:11.1"
+    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "pci:00:00.0;net-attach-def:foo/bar"
 }
 
 @test "vRouter StatefulSet: XR_INTERFACES doesn't support any flags currently" {
