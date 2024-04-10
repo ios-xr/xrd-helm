@@ -222,7 +222,7 @@
       "type": "string",
       "default": "/etc/network-status"
     },
-    "networkStatusFile": {
+    "networkStatusFilename": {
       "description": "Filename for network status file",
       "type": "string",
       "default": "network-status-annotation"
