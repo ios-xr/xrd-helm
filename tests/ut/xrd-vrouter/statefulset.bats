@@ -373,8 +373,13 @@ setup_file () {
     assert_query_equal '.spec.template.spec.containers[0].env[1].value' "pci:00:00.0;net-attach-def:default/release-name-xrd-vrouter-1"
 }
 
-@test "vRouter StatefulSet: XR_INTERFACES doesn't support any flags currently" {
+@test "vRouter StatefulSet: pci  XR_INTERFACES don't support any flags currently" {
     template_failure --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}, "chksum": true}]'
+    assert_error_message_contains "Additional property chksum is not allowed"
+}
+
+@test "vRouter StatefulSet: sriov XR_INTERFACES don't support any flags currently" {
+    template_failure --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "chksum": true}]'
     assert_error_message_contains "Additional property chksum is not allowed"
 }
 
@@ -441,7 +446,7 @@ setup_file () {
         --set 'networkStatusDir=/bar' \
         --set 'networkStatusFilename=baz'
     assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_NETWORK_STATUS_ANNOTATION_PATH"
-    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "/foo/bar"
+    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "/bar/baz"
 }
 
 @test "vRouter StatefulSet: XR_DISK_USAGE_LIMIT is set if persistence is enabled with default value" {
