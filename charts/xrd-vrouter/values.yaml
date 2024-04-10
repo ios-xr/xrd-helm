@@ -134,6 +134,11 @@ extraHostPathMounts: []
   # exist at container start (default false).
   #create: false
 
+# Mount dir and filename for the network-status annotation mounted into the Pod
+# when using sriov interfaces on XR vRouter.
+networkStatusDir: /etc/network-status
+networkStatusFilename: network-status-annotation
+
 # XR configuration and boot scripts.
 config:
   # Username and password for the root system user.
