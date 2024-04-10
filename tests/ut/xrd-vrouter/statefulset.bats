@@ -235,9 +235,9 @@ setup_file () {
 
 @test "vRouter StatefulSet: downwardAPI volume is set if sriov network" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_query_equal '.spec.template.spec.volumes[0].name' "network-status"
+    assert_query_equal '.spec.template.spec.volumes[0].name' "network-status-annotation"
     assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].fieldRef.fieldPath' "metadata.annotations['k8s.v1.cni.cncf.io/network-status']"
-    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "network-status"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "network-status-annotation"
 }
 
 
@@ -432,16 +432,16 @@ setup_file () {
 
 @test "vRouter StatefulSet: XR_NETWORK_STATUS_ANNOTATION_PATH is set when there is an sriov network" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_error_message_contains "abcd"
-    assert_query '.spec.template.spec.containers[0].env[4] | not'
+    assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_NETWORK_STATUS_ANNOTATION_PATH"
+    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "/etc/network-status/network-status-annotation"
 }
 
 @test "vRouter StatefulSet: XR_NETWORK_STATUS_ANNOTATION_PATH can be overridden" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
-        --set 'networkStatusDir=/foo' \
-        --set 'networkStatusFilename=bar'
-    assert_error_message_contains "abcd"
-    assert_query '.spec.template.spec.containers[0].env[4] | not'
+        --set 'networkStatusDir=/bar' \
+        --set 'networkStatusFilename=baz'
+    assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_NETWORK_STATUS_ANNOTATION_PATH"
+    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "/foo/bar"
 }
 
 @test "vRouter StatefulSet: XR_DISK_USAGE_LIMIT is set if persistence is enabled with default value" {
