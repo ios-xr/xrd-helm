@@ -547,6 +547,14 @@ setup_file () {
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "network-status-annotation"
 }
 
+@test "vRouter StatefulSet: network-status annotation mount point can be overridden" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
+        --set 'networkStatusDir=/bar' \
+        --set 'networkStatusFilename=baz'
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/bar"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "baz"
+}
+
 @test "vRouter StatefulSet: container imagePullSecrets can be set" {
     template --set 'image.pullSecrets[0].name=foo'
     assert_query_equal '.spec.template.spec.imagePullSecrets[0].name' "foo"
