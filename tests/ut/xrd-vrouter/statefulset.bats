@@ -235,9 +235,9 @@ setup_file () {
 
 @test "vRouter StatefulSet: downwardAPI volume is set if sriov network" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_query_equal '.spec.template.spec.volumes[0].name' "net-stat-annotation"
+    assert_query_equal '.spec.template.spec.volumes[0].name' "network-status-annotation"
     assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].fieldRef.fieldPath' "metadata.annotations['k8s.v1.cni.cncf.io/network-status']"
-    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "xrd"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "network-status"
 }
 
 
@@ -370,7 +370,7 @@ setup_file () {
 @test "vRouter StatefulSet: XR_INTERFACES container env vars is correctly set" {
     template --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}}, {"type": "sriov", "resource": "foo/bar"}]'
     assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "pci:00:00.0;net-attach-def:foo/bar"
+    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "pci:00:00.0;net-attach-def:default/release-name-xrd-vrouter-1"
 }
 
 @test "vRouter StatefulSet: XR_INTERFACES doesn't support any flags currently" {
@@ -422,6 +422,12 @@ setup_file () {
 @test "vRouter StatefulSet: don't set unsupported flags XR_MGMT_INTERFACES" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "multus", "foo": "bar"}]'
     assert_error_message_contains "Additional property foo is not allowed"
+}
+
+@test "vRouter StatefulSet: XR_NETWORK_STATUS_ANNOTATION_PATH is not set by default" {
+    template
+    assert_error_message_contains "abcd"
+    assert_query '.spec.template.spec.containers[0].env[3] | not'
 }
 
 @test "vRouter StatefulSet: XR_DISK_USAGE_LIMIT is set if persistence is enabled with default value" {
@@ -516,10 +522,10 @@ setup_file () {
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "bar"
 }
 
-@test "vRouter StatefulSet: net-stat annotation is mounted if there is sriov network" {
+@test "vRouter StatefulSet: network-status annotation is mounted if there is sriov network" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/xrd"
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "net-stat-annotation"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/network-status"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "network-status-annotation"
 }
 
 @test "vRouter StatefulSet: container imagePullSecrets can be set" {
