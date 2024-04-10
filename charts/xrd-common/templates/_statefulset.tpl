@@ -96,8 +96,8 @@ spec:
           items:
           - fieldRef:
               fieldPath: metadata.annotations['k8s.v1.cni.cncf.io/network-status']
-            path: network-status-annotation
-        name: network-status-annotation
+            path: {{ .Values.networkStatusFilename | quote }}
+        name: {{ .Values.networkStatusFilename | quote }}
       {{- end }}
       {{- if .Values.extraVolumes }}
       {{- toYaml .Values.extraVolumes | nindent 6 }}
@@ -137,8 +137,8 @@ spec:
         {{- toYaml .Values.extraVolumeMounts | nindent 8 }}
         {{- end }}
         {{- if (include "xrd.interfaces.anySRIOV" .) }}
-        - mountPath: /etc/network-status
-          name: network-status-annotation
+        - mountPath: {{ .Values.networkStatusDir | quote }}
+          name: {{ .Values.networkStatusFilename | quote }}
         {{- end }}
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
