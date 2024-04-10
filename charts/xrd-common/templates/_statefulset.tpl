@@ -53,7 +53,6 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
-      serviceAccountName: default2
       {{- if .Values.hostNetwork }}
       hostNetwork: true
       {{- end }}
@@ -97,8 +96,8 @@ spec:
           items:
           - fieldRef:
               fieldPath: metadata.annotations['k8s.v1.cni.cncf.io/network-status']
-            path: net-stat
-        name: net-stat
+            path: network-status-annotation
+        name: network-status-annotation
       {{- end }}
       {{- if .Values.extraVolumes }}
       {{- toYaml .Values.extraVolumes | nindent 6 }}
@@ -138,8 +137,8 @@ spec:
         {{- toYaml .Values.extraVolumeMounts | nindent 8 }}
         {{- end }}
         {{- if (include "xrd.interfaces.anySRIOV" .) }}
-        - mountPath: /etc/net-stat
-          name: net-stat
+        - mountPath: /etc/network-status
+          name: network-status-annotation
         {{- end }}
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
