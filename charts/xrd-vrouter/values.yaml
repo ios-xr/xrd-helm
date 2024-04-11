@@ -46,7 +46,7 @@ labels: {}
 annotations: {}
 
 # Pre-existing ServiceAccount for the XRd Pod to use (optional).
-#serviceAccountName: ""
+# serviceAccountName: ""
 
 # Pod resource configuration.
 # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/

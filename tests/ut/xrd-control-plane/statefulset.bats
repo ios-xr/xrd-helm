@@ -134,6 +134,16 @@ setup_file () {
     assert_query_equal '.spec.template.metadata.labels.foo' "bar"
 }
 
+@test "Control Plane StatefulSet: No serviceAccountName by default" {
+    template
+    assert_query '.spec.serviceAccountName | not'
+}
+
+@test "Control Plane StatefulSet: serviceAccountName can be set" {
+    template --set 'serviceAccountName=foo'
+    assert_query_equal '.spec.template.spec.serviceAccountName' "foo"
+}
+
 @test "Control Plane StatefulSet: No hostNetwork by default" {
     template
     assert_query_equal '.spec.template.spec.hostNetwork' "null"
