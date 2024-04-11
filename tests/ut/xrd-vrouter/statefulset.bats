@@ -80,6 +80,16 @@ setup_file () {
     assert_fields_equal '.spec.serviceName' '.metadata.name'
 }
 
+@test "vRouter StatefulSet: No serviceAccountName by default" {
+    template
+    assert_query '.spec.serviceAccountName | not'
+}
+
+@test "vRouter StatefulSet: serviceAccountName can be set" {
+    template --set 'serviceAccountName=foo'
+    assert_query_equal '.spec.serviceAccountName' "foo"
+}
+
 @test "vRouter StatefulSet: Selector labels are set" {
     template
     assert_query_equal '.spec.selector.matchLabels' \
