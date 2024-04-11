@@ -87,7 +87,7 @@ setup_file () {
 
 @test "vRouter StatefulSet: serviceAccountName can be set" {
     template --set 'serviceAccountName=foo'
-    assert_query_equal '.spec.serviceAccountName' "foo"
+    assert_query_equal '.spec.template.spec.serviceAccountName' "foo"
 }
 
 @test "vRouter StatefulSet: Selector labels are set" {

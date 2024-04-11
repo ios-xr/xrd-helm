@@ -31,9 +31,6 @@ metadata:
 spec:
   replicas: 1
   serviceName: {{ include "xrd.fullname" . }}
-  {{- if .Values.serviceAccountName }}
-  serviceAccountName: {{ .Values.serviceAccountName | quote }}
-  {{- end }}
   {{- if .Values.podManagementPolicy }}
   {{- end }}
   selector:
@@ -58,6 +55,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      {{- end }}
       {{- if .Values.hostNetwork }}
       hostNetwork: true
       {{- end }}
