@@ -32,7 +32,9 @@ spec:
   replicas: 1
   serviceName: {{ include "xrd.fullname" . }}
   {{- if .Values.serviceAccountName }}
-  serviceAccount: {{ .Values.serviceAccountName }}
+  serviceAccountName: {{ .Values.serviceAccountName | quote }}
+  {{- end }}
+  {{- if .Values.podManagementPolicy }}
   {{- end }}
   selector:
     matchLabels:

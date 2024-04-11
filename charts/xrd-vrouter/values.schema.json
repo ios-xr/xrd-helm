@@ -81,10 +81,6 @@
       "description": "Annotations added to the XRd deployment",
       "type": "object"
     },
-    "serviceAccountName": {
-      "description": "Name of the service account to use for the XRd pod",
-      "type": "string"
-    },
     "resources": {
       "description": "Standard Kubernetes container resources object",
       "type": "object"
