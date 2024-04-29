@@ -31,8 +31,6 @@ metadata:
 spec:
   replicas: 1
   serviceName: {{ include "xrd.fullname" . }}
-  {{- if .Values.podManagementPolicy }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "xrd.selectorLabels" . | nindent 6 }}
