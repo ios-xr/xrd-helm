@@ -32,16 +32,9 @@ jobs:
 
       - uses: helm/chart-testing-action@v2.3.1
 
-      - name: Run all tests
-        run: scripts/commit-check-new
-
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-
-      - uses: ludeeus/action-shellcheck@1.1.0
-        with:
-          scandir: 'scripts/'
 
       - uses: actions/checkout@v4
 
@@ -51,17 +44,6 @@ jobs:
         with:
           context: "tests"
           load: true
-          tags: tests:latest
 
-      - name: "Build container"
-        run: |
-          docker build tests/ -t helm-tests
-
-      - name: "Run Control Plane unit tests"
-        run: |
-          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane
-
-      - name: "Run vRouter unit tests"
-        run: |
-          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
-
+      - name: Run all tests
+        run: scripts/commit-check-new

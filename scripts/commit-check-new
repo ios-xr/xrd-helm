@@ -50,12 +50,12 @@ docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane
 docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
 
 
-# echo
-# echo "Running shellcheck..."
-# if ! shellcheck scripts/{apply-bugfixes,launch-xrd}; then
-#     echo "Shellcheck failed, check output and fix issues." >&2
-#     FAILURES=$((FAILURES+1))
-# fi
+echo
+echo "Running shellcheck..."
+if ! shellcheck scripts/*; then
+    echo "Shellcheck failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
 
 # echo
 # echo "Running tests..."
