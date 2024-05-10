@@ -44,4 +44,4 @@ jobs:
           load: true
 
       - name: Run all tests
-        run: scripts/commit-check-new
+        run: scripts/commit-check
