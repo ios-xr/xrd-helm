@@ -49,8 +49,12 @@ docker build tests/ -t helm-tests
 # Control Plane unit tests
 docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane
 
-# vRouter unit tests
-docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
+echo
+echo "Running vRouter unit tests..."
+if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
+    echo "vRouter unit tests failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
 
 
 echo
