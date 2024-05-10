@@ -14,11 +14,6 @@ set -e
 
 # trap cleanup EXIT
 
-# @@@ Needed
-# shellcheck
-# helm-sa
-# helm ut
-
 
 #=====================================================
 # Run checks
@@ -44,6 +39,15 @@ ct lint --config .github/config/ct.yml --target-branch $DEFAULT_BRANCH
 
 # chart-testing (check-version-increment)
 ct lint --config .github/config/ct-version-increment.yml --target-branch $DEFAULT_BRANCH
+
+# Build container for UT
+docker build tests/ -t helm-tests
+
+# Control Plane unit tests
+docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane
+
+# vRouter unit tests
+docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
 
 
 # echo
