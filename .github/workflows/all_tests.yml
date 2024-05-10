@@ -1,4 +1,4 @@
-name: static-analysis
+name: commit-checks
 
 on:
   pull_request:
@@ -10,12 +10,13 @@ on:
       - '*.md'
   push:
     branches:
+      - 'main'
       - 'gh-actions*'
 
 jobs:
-  helm:
+  all_tests:
     runs-on: ubuntu-latest
-    name: 'helm-sa'
+    name: 'commit-checks'
     steps:
       - uses: actions/checkout@v3
         with:
@@ -50,10 +51,6 @@ jobs:
           python3 -m pip install PyYAML
           scripts/check-dependency-version-increment
 
-  shellcheck:
-    runs-on: ubuntu-latest
-    name: 'bash-sa (shellcheck)'
-    steps:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
@@ -61,3 +58,26 @@ jobs:
       - uses: ludeeus/action-shellcheck@1.1.0
         with:
           scandir: 'scripts/'
+
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/build-push-action@v5
+        with:
+          context: "tests"
+          load: true
+          tags: tests:latest
+
+      - name: "Build container"
+        run: |
+          docker build tests/ -t helm-tests
+
+      - name: "Run Control Plane unit tests"
+        run: |
+          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane
+
+      - name: "Run vRouter unit tests"
+        run: |
+          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
+
