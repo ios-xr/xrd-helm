@@ -1,0 +1,61 @@
+#!/bin/bash
+
+set -e
+
+
+# function cleanup()
+# {
+#     echo
+#     echo "Cleaning up..."
+#     if [[ -d $TMP_VENV ]]; then
+#         rm -r "$TMP_VENV"
+#     fi
+# }
+
+# trap cleanup EXIT
+
+# @@@ Needed
+# shellcheck
+# helm-sa
+# helm ut
+
+
+#=====================================================
+# Run checks
+#=====================================================
+
+FAILURES=0
+
+# Check version incerment
+python3 -m pip install --upgrade pip
+python3 -m pip install PyYAML
+
+./scripts/check-dependency-version-increment
+
+# echo
+# echo "Running shellcheck..."
+# if ! shellcheck scripts/{apply-bugfixes,launch-xrd}; then
+#     echo "Shellcheck failed, check output and fix issues." >&2
+#     FAILURES=$((FAILURES+1))
+# fi
+
+# echo
+# echo "Running tests..."
+# if ! pytest; then
+#     echo "Tests failed, check output and fix issues." >&2
+#     FAILURES=$((FAILURES+1))
+# fi
+
+
+#=====================================================
+# Final steps
+#=====================================================
+
+echo
+if ((FAILURES > 0)); then
+    echo "ERROR: There were $FAILURES failures"
+    exit 1
+else
+    echo "SUCCESS: All passed!"
+    exit 0
+fi

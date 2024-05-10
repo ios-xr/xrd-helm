@@ -45,11 +45,8 @@ jobs:
       - name: Run chart-testing (check-version-increment)
         run: ct lint --config .github/config/ct-version-increment.yml --target-branch ${{ github.event.repository.default_branch }}
 
-      - name: Run check-dependency-version-increment
-        run: |
-          python3 -m pip install --upgrade pip
-          python3 -m pip install PyYAML
-          scripts/check-dependency-version-increment
+      - name: Run all tests
+        run: commit-check
 
       - uses: actions/checkout@v3
         with:
@@ -68,16 +65,4 @@ jobs:
           context: "tests"
           load: true
           tags: tests:latest
-
-      - name: "Build container"
-        run: |
-          docker build tests/ -t helm-tests
-
-      - name: "Run Control Plane unit tests"
-        run: |
-          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane
-
-      - name: "Run vRouter unit tests"
-        run: |
-          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
 
