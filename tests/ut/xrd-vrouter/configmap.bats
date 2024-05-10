@@ -11,7 +11,7 @@ setup_file () {
 
 @test "vRouter ConfigMap: No ConfigMap is generated if no config is set" {
     template_failure
-    assert_error_message_contains "AAAAcould not find template templates/config-configmap.yaml in chart"
+    assert_error_message_contains "could not find template templates/config-configmap.yaml in chart"
 }
 
 @test "vRouter ConfigMap: Name consists of the release name and the template name" {
