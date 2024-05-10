@@ -3,16 +3,16 @@
 set -e
 
 
-# function cleanup()
-# {
-#     echo
-#     echo "Cleaning up..."
-#     if [[ -d $TMP_VENV ]]; then
-#         rm -r "$TMP_VENV"
-#     fi
-# }
+function cleanup()
+{
+    echo
+    echo "Cleaning up..."
+    if [[ -d $TMP_VENV ]]; then
+        rm -r "$TMP_VENV"
+    fi
+}
 
-# trap cleanup EXIT
+trap cleanup EXIT
 
 
 #=====================================================
@@ -21,8 +21,12 @@ set -e
 
 FAILURES=0
 
-python3 -m pip install --upgrade pip
-python3 -m pip install PyYAML
+echo "Setting up python venv..."
+TMP_VENV=$(mktemp -d -t venv.XXXXXX)
+python3 -m venv "$TMP_VENV"
+source "$TMP_VENV/bin/activate"
+pip install --upgrade pip
+pip install PyYAML
 
 echo
 echo "Running version-increment dependency check"
