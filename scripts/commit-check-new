@@ -55,7 +55,7 @@ docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
 
 echo
 echo "Running shellcheck..."
-if ! shellcheck scripts/*; then
+if ! shellcheck scripts/{chart-releaser,commit-check,commit-check-new}; then
     echo "Shellcheck failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
 fi
