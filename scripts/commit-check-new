@@ -31,9 +31,9 @@ echo
 echo "Running chart-testing (list-changed)"
 DEFAULT_BRANCH="main"
 changed=$(ct list-changed --target-branch $DEFAULT_BRANCH)
-    if [[ -n "$changed" ]]; then
-        echo "::set-output name=changed::true"
-    fi
+if [[ -n "$changed" ]]; then
+    echo "::set-output name=changed::true"
+fi
 
 echo
 echo "Running chart-testing (lint)"
