@@ -27,17 +27,20 @@ python3 -m pip install PyYAML
 
 ./scripts/check-dependency-version-increment
 
-# chart-testing (list-changed)
+echo
+echo "Running chart-testing (list-changed)"
 DEFAULT_BRANCH="main"
 changed=$(ct list-changed --target-branch $DEFAULT_BRANCH)
     if [[ -n "$changed" ]]; then
         echo "::set-output name=changed::true"
     fi
 
-# chart-testing (lint)
+echo
+echo "Running chart-testing (lint)"
 ct lint --config .github/config/ct.yml --target-branch $DEFAULT_BRANCH
 
-# chart-testing (check-version-increment)
+echo
+echo "Running chart-testing (check-version-increment)"
 ct lint --config .github/config/ct-version-increment.yml --target-branch $DEFAULT_BRANCH
 
 # Build container for UT
