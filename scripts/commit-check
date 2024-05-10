@@ -1,35 +1,85 @@
-#!/usr/bin/env bash
-# commit-check - Pre-commit checks
+#!/bin/bash
 
-set -e -o pipefail
+set -e
 
+
+# function cleanup()
+# {
+#     echo
+#     echo "Cleaning up..."
+#     if [[ -d $TMP_VENV ]]; then
+#         rm -r "$TMP_VENV"
+#     fi
+# }
+
+# trap cleanup EXIT
+
+
+#=====================================================
+# Run checks
+#=====================================================
 
 FAILURES=0
 
+python3 -m pip install --upgrade pip
+python3 -m pip install PyYAML
 
-echo "Running helm lint..."
-args=("--set" "image.repository=repository" "--set" "image.tag=latest")
-error=false
-for chart in charts/*; do
-    pushd "$chart"
-    if ! (helm dependency update && helm lint "${args[@]}"); then
-        error=true
-    fi
-    popd
-done
-if [ $error = true ]; then
+echo
+echo "Running version-increment dependency check"
+if ! ./scripts/check-dependency-version-increment; then
+    echo "Version-increment dependency check failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
-    echo "helm lint failed, check output and fix errors" >&2
 fi
 
+echo
+echo "Running chart testing (list-changed)"
+DEFAULT_BRANCH="main"
+changed=$(ct list-changed --target-branch $DEFAULT_BRANCH)
+    if [[ -n "$changed" ]]; then
+        echo "::set-output name=changed::true"
+    fi
+
+echo
+echo "Running chart testing (lint)"
+if ! ct lint --config .github/config/ct.yml --target-branch $DEFAULT_BRANCH; then
+    echo "Chart testing (lint) failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
+
+echo
+echo "Running chart testing (check-version-increment)"
+if ! ct lint --config .github/config/ct-version-increment.yml --target-branch $DEFAULT_BRANCH; then
+    echo "Chart testing (check-version-increment) failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
+
+# Build container for UT
+docker build tests/ -t helm-tests
+
+echo
+echo "Running Control Plane unit tests..."
+if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
+    echo "Control Plane unit tests failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
+
+echo
+echo "Running vRouter unit tests..."
+if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
+    echo "vRouter unit tests failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
 
 echo
 echo "Running shellcheck..."
 if ! shellcheck scripts/{chart-releaser,commit-check}; then
-    echo "shellcheck failed, check output and fix issues." >&2
+    echo "Shellcheck failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
 fi
 
+#=====================================================
+# Final steps
+#=====================================================
 
 echo
 if ((FAILURES > 0)); then
