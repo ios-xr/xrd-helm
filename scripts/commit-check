@@ -22,6 +22,7 @@ FAILURES=0
 echo "Setting up python venv..."
 TMP_VENV=$(mktemp -d -t venv.XXXXXX)
 python3 -m venv "$TMP_VENV"
+# shellcheck source=/dev/null
 source "$TMP_VENV/bin/activate"
 pip install --upgrade pip
 pip install PyYAML
@@ -57,7 +58,7 @@ fi
 
 echo
 echo "Running shellcheck..."
-if ! shellcheck source=/dev/null scripts/{chart-releaser,commit-check}; then
+if ! shellcheck scripts/{chart-releaser,commit-check}; then
     echo "Shellcheck failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
 fi

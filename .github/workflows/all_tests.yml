@@ -32,10 +32,6 @@ jobs:
 
       - uses: helm/chart-testing-action@v2.3.1
 
-      - uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
-
       - uses: docker/setup-buildx-action@v3
 
       - uses: docker/build-push-action@v5
