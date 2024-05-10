@@ -2,7 +2,6 @@
 
 set -e
 
-
 function cleanup()
 {
     echo
@@ -13,7 +12,6 @@ function cleanup()
 }
 
 trap cleanup EXIT
-
 
 #=====================================================
 # Run checks
@@ -57,6 +55,13 @@ if ! ct lint --config .github/config/ct-version-increment.yml --target-branch $D
     FAILURES=$((FAILURES+1))
 fi
 
+echo
+echo "Running shellcheck..."
+if ! shellcheck source=/dev/null scripts/{chart-releaser,commit-check}; then
+    echo "Shellcheck failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
+
 # Build container for UT
 docker build tests/ -t helm-tests
 
@@ -71,13 +76,6 @@ echo
 echo "Running vRouter unit tests..."
 if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
     echo "vRouter unit tests failed, check output and fix issues." >&2
-    FAILURES=$((FAILURES+1))
-fi
-
-echo
-echo "Running shellcheck..."
-if ! shellcheck scripts/{chart-releaser,commit-check}; then
-    echo "Shellcheck failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
 fi
 
