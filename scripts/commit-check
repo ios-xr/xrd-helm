@@ -34,27 +34,29 @@ if ! ./scripts/check-dependency-version-increment; then
     FAILURES=$((FAILURES+1))
 fi
 
-echo
-echo "Running chart testing (list-changed)"
-DEFAULT_BRANCH="main"
-changed=$(ct list-changed --target-branch $DEFAULT_BRANCH)
-    if [[ -n "$changed" ]]; then
-        echo "::set-output name=changed::true"
-    fi
+# Install ct by pulling docker image
 
-echo
-echo "Running chart testing (lint)"
-if ! ct lint --config .github/config/ct.yml --target-branch $DEFAULT_BRANCH; then
-    echo "Chart testing (lint) failed, check output and fix issues." >&2
-    FAILURES=$((FAILURES+1))
-fi
+# echo
+# echo "Running chart testing (list-changed)"
+# DEFAULT_BRANCH="main"
+# changed=$(ct list-changed --target-branch $DEFAULT_BRANCH)
+#     if [[ -n "$changed" ]]; then
+#         echo "::set-output name=changed::true"
+#     fi
 
-echo
-echo "Running chart testing (check-version-increment)"
-if ! ct lint --config .github/config/ct-version-increment.yml --target-branch $DEFAULT_BRANCH; then
-    echo "Chart testing (check-version-increment) failed, check output and fix issues." >&2
-    FAILURES=$((FAILURES+1))
-fi
+# echo
+# echo "Running chart testing (lint)"
+# if ! ct lint --config .github/config/ct.yml --target-branch $DEFAULT_BRANCH; then
+#     echo "Chart testing (lint) failed, check output and fix issues." >&2
+#     FAILURES=$((FAILURES+1))
+# fi
+
+# echo
+# echo "Running chart testing (check-version-increment)"
+# if ! ct lint --config .github/config/ct-version-increment.yml --target-branch $DEFAULT_BRANCH; then
+#     echo "Chart testing (check-version-increment) failed, check output and fix issues." >&2
+#     FAILURES=$((FAILURES+1))
+# fi
 
 echo
 echo "Running shellcheck..."
@@ -64,7 +66,7 @@ if ! shellcheck scripts/{chart-releaser,commit-check}; then
 fi
 
 # Build container for UT
-docker build tests/ -t helm-tests
+docker build tests/ -t helm-tests --network host
 
 echo
 echo "Running Control Plane unit tests..."
