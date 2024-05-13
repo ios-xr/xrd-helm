@@ -319,58 +319,48 @@ setup_file () {
 
 @test "Control Plane StatefulSet: container env vars version is set" {
     template
-    assert_query_equal '.spec.template.spec.containers[0].env[0].name' "XR_ENV_VARS_VERSION"
-    assert_query_equal '.spec.template.spec.containers[0].env[0].value' "1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_ENV_VARS_VERSION"))][0][0].value' "1"
 }
 
 @test "Control Plane StatefulSet: empty container interface env vars are set by default" {
     template
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' ""
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' ""
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' ""
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' ""
 }
 
 @test "Control Plane StatefulSet: XR_INTERFACES container env vars is correctly set" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni"}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "linux:net1;linux:eth0"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0"
 }
 
 @test "Control Plane StatefulSet: set snoopIpv4Address flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "snoopIpv4Address": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "linux:net1;linux:eth0,snoop_v4"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,snoop_v4"
 }
 
 @test "Control Plane StatefulSet: set snoopIpv4DefaultRoot flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "snoopIpv4DefaultRoute": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "linux:net1;linux:eth0,snoop_v4_default_route"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,snoop_v4_default_route"
 }
 
 @test "Control Plane StatefulSet: set snoopIpv6Address flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "snoopIpv6Address": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "linux:net1;linux:eth0,snoop_v6"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,snoop_v6"
 }
 
 @test "Control Plane StatefulSet: set snoopIpv6DefaultRoot flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "snoopIpv6DefaultRoute": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "linux:net1;linux:eth0,snoop_v6_default_route"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,snoop_v6_default_route"
 }
 
 @test "Control Plane StatefulSet: set chksum flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "chksum": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "linux:net1;linux:eth0,chksum"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,chksum"
 }
 
 @test "Control Plane StatefulSet: set xrName flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "xrName": "foo"}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "linux:net1;linux:eth0,xr_name=foo"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,xr_name=foo"
 }
 
 @test "Control Plane StatefulSet: don't set unsupported flags XR_INTERFACES" {
@@ -380,60 +370,50 @@ setup_file () {
 
 @test "Control Plane StatefulSet: XR_MGMT_INTERFACES container env vars is correctly set" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "chksum": true}, {"type": "defaultCni"}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' "linux:net1,chksum;linux:eth0"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1,chksum;linux:eth0"
 }
 
 @test "Control Plane StatefulSet: XR_DISK_USAGE_LIMIT is set if persistence is enabled with default value" {
     template --set 'persistence.enabled=true'
-    assert_query_equal '.spec.template.spec.containers[0].env[0].name' "XR_DISK_USAGE_LIMIT"
-    assert_query_equal '.spec.template.spec.containers[0].env[0].value' "6G"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_DISK_USAGE_LIMIT"))][0][0].value' "6G"
 }
 
 @test "Control Plane StatefulSet: value of XR_DISK_USAGE_LIMIT can be set" {
     template --set 'persistence.enabled=true' --set 'persistence.size=123kb'
-    assert_query_equal '.spec.template.spec.containers[0].env[0].name' "XR_DISK_USAGE_LIMIT"
-    assert_query_equal '.spec.template.spec.containers[0].env[0].value' "123K"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_DISK_USAGE_LIMIT"))][0][0].value' "123K"
 }
 
 @test "Control Plane StatefulSet: XR_FIRST_BOOT_CONFIG is set if config is to be applied on first boot" {
     template --set 'config.username=foo' --set 'config.password=bar'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_FIRST_BOOT_CONFIG"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "/etc/xrd/startup.cfg"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_FIRST_BOOT_CONFIG"))][0][0].value' "/etc/xrd/startup.cfg"
 }
 
 @test "Control Plane StatefulSet: XR_EVERY_BOOT_CONFIG is set if ascii config is to be applied on every boot" {
     template --set 'config.ascii=foo' --set 'config.asciiEveryBoot=true'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_EVERY_BOOT_CONFIG"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "/etc/xrd/startup.cfg"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_EVERY_BOOT_CONFIG"))][0][0].value' "/etc/xrd/startup.cfg"
 }
 
 @test "Control Plane StatefulSet: XR_ZTP_ENABLE can be set" {
     template --set 'config.ztpEnable=true'
-    assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_ZTP_ENABLE"
-    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_ZTP_ENABLE"))][0][0].value' "1"
 }
 
 @test "Control Plane StatefulSet: XR_ZTP_INI can be set" {
     template --set 'config.ztpEnable=true' --set 'config.ztpIni=foo'
-    assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_ZTP_ENABLE"
-    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "1"
-    assert_query_equal '.spec.template.spec.containers[0].env[4].name' "XR_ZTP_ENABLE_WITH_INI"
-    assert_query_equal '.spec.template.spec.containers[0].env[4].value' "/etc/xrd/ztp.ini"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_ZTP_ENABLE"))][0][0].value' "1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_ZTP_ENABLE_WITH_INI"))][0][0].value' "/etc/xrd/ztp.ini"
 }
 
 @test "Control Plane StatefulSet: advanced settings can be used to add env vars" {
     template --set 'advancedSettings.FOO=bar'
-    assert_query_equal '.spec.template.spec.containers[0].env[0].name' "FOO"
-    assert_query_equal '.spec.template.spec.containers[0].env[0].value' "bar"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "FOO"))][0][0].value' "bar"
 }
 
 @test "Control Plane StatefulSet: advanced settings can be used to override default settings" {
     template \
         --set 'config.ascii=foo' \
         --set 'advancedSettings.XR_FIRST_BOOT_CONFIG=foo'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_FIRST_BOOT_CONFIG"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "foo"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_FIRST_BOOT_CONFIG"))][0][0].value' "foo"
 }
 
 @test "Control Plane StatefulSet: no container volumeMounts by default" {

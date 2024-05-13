@@ -221,16 +221,6 @@
         "type": "object"
       }
     },
-    "networkStatusDir": {
-      "description": "Directory to store network status file",
-      "type": "string",
-      "default": "/etc/network-status"
-    },
-    "networkStatusFilename": {
-      "description": "Filename for network status file",
-      "type": "string",
-      "default": "network-status-annotation"
-    },
     "extraHostPathMounts": {
       "description": "Extra hostpath mounts for the XRd container",
       "type": "array",

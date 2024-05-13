@@ -124,3 +124,10 @@ Generate config for CNI used by sriov-type networks.
 {{- end }}
 {{- $config | toPrettyJson }}
 {{- end -}}
+
+{{- /*
+Should the NetworkStatusAnnotation be mounted?
+*/ -}}
+{{- define "xrd.mountNetworkStatusAnnotation" -}}
+{{- include "xrd.interfaces.anySRIOV" . -}}
+{{- end -}}

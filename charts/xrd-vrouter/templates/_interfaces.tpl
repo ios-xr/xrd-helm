@@ -55,7 +55,7 @@
       {{- fail "attachmentConfig may not be specified for sriov interface types" }}
     {{- end }}
     {{- $flags := include "xrd.interfaces.sriovflags" . }}
-    {{- $hasNetwork = 1}}
+    {{- $hasNetwork = 1 }}
     {{- if $hasPciRange }}
       {{- fail "If a pci interface range (i.e. 'pci' type with 'first' or 'last' config) is specified, no other pci or sriov interfaces may be specified" }}
     {{- end }}
