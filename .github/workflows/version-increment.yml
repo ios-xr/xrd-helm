@@ -21,10 +21,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v4
-        with:
-          python-version: '3.7'
-
       - uses: azure/setup-helm@v3
         with:
           version: '3.10.0'
