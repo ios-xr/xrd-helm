@@ -33,3 +33,5 @@ for chart in {"xrd-control-plane", "xrd-vrouter"}:
     assert (
         version == xrd_common_version
     ), f"Chart '{chart}' requires 'xrd-common' dependency update from {version} to {xrd_common_version}"
+
+assert False
