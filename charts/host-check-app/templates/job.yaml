@@ -48,5 +48,5 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 6 }}
-      {{- end }}  {{- end }}
+      {{- end }}
   backoffLimit: 0
