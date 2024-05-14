@@ -1,6 +1,38 @@
 #!/bin/bash
 
+# This script runs all commit checks EXCEPT for checking that the version is
+# correctly incermented, which is done via a seperate github action on the
+# public xrd-helm repository.
+
 set -e
+
+CONTAINER_TOOL="docker"
+
+usage() {
+    echo "Usage: $0 -t <docker|podman>"
+    exit 1
+}
+
+while getopts ":t:" opt; do
+    case $opt in
+        t)
+            CONTAINER_TOOL="$OPTARG"
+            ;;
+        \?)
+            echo "Invalid option: -$OPTARG" >&2
+            usage
+            ;;
+        :)
+            echo "Option -$OPTARG requires an argument." >&2
+            usage
+            ;;
+    esac
+done
+
+if [ "$CONTAINER_TOOL" != "docker" ] && [ "$CONTAINER_TOOL" != "podman" ]; then
+    echo "Error: Only 'docker' or 'podman' can be specified as the container tool."
+    usage
+fi
 
 function cleanup()
 {
@@ -34,29 +66,21 @@ if ! ./scripts/check-dependency-version-increment; then
     FAILURES=$((FAILURES+1))
 fi
 
-# Install ct by pulling docker image
-
-# echo
-# echo "Running chart testing (list-changed)"
-# DEFAULT_BRANCH="main"
-# changed=$(ct list-changed --target-branch $DEFAULT_BRANCH)
-#     if [[ -n "$changed" ]]; then
-#         echo "::set-output name=changed::true"
-#     fi
-
-# echo
-# echo "Running chart testing (lint)"
-# if ! ct lint --config .github/config/ct.yml --target-branch $DEFAULT_BRANCH; then
-#     echo "Chart testing (lint) failed, check output and fix issues." >&2
-#     FAILURES=$((FAILURES+1))
-# fi
-
-# echo
-# echo "Running chart testing (check-version-increment)"
-# if ! ct lint --config .github/config/ct-version-increment.yml --target-branch $DEFAULT_BRANCH; then
-#     echo "Chart testing (check-version-increment) failed, check output and fix issues." >&2
-#     FAILURES=$((FAILURES+1))
-# fi
+echo
+echo "Running helm lint..."
+args=("--set" "image.repository=repository" "--set" "image.tag=latest")
+error=false
+for chart in charts/*; do
+    pushd "$chart"
+    if ! (helm dependency update && helm lint "${args[@]}"); then
+        error=true
+    fi
+    popd
+done
+if [ $error = true ]; then
+    FAILURES=$((FAILURES+1))
+    echo "helm lint failed, check output and fix errors" >&2
+fi
 
 echo
 echo "Running shellcheck..."
@@ -65,21 +89,44 @@ if ! shellcheck scripts/{chart-releaser,commit-check}; then
     FAILURES=$((FAILURES+1))
 fi
 
-# Build container for UT
-docker build tests/ -t helm-tests --network host
+# Build container for UT and run tests using docker or podman
+if [ "$CONTAINER_TOOL" == "docker" ]; then
+    docker build tests/ -t helm-tests --network host
 
-echo
-echo "Running Control Plane unit tests..."
-if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
-    echo "Control Plane unit tests failed, check output and fix issues." >&2
-    FAILURES=$((FAILURES+1))
-fi
+    echo
+    echo "Running Control Plane unit tests..."
+    if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
+        echo "Control Plane unit tests failed, check output and fix issues." >&2
+        FAILURES=$((FAILURES+1))
+    fi
 
-echo
-echo "Running vRouter unit tests..."
-if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
-    echo "vRouter unit tests failed, check output and fix issues." >&2
-    FAILURES=$((FAILURES+1))
+    echo
+    echo "Running vRouter unit tests..."
+    if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
+        echo "vRouter unit tests failed, check output and fix issues." >&2
+        FAILURES=$((FAILURES+1))
+    fi
+elif [ "$CONTAINER_TOOL" == "podman" ]; then
+    podman build tests/ -t helm-tests --network host
+
+    echo
+    echo "Running Control Plane unit tests..."
+    if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
+        echo "Control Plane unit tests failed, check output and fix issues." >&2
+        FAILURES=$((FAILURES+1))
+    fi
+
+    echo
+    echo "Running vRouter unit tests..."
+    if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
+        echo "vRouter unit tests failed, check output and fix issues." >&2
+        FAILURES=$((FAILURES+1))
+    fi
+else
+    echo "Error: Unsupported container tool. Use 'docker' or 'podman'."
+    usage
+    # This should never be reached
+    exit 1
 fi
 
 #=====================================================

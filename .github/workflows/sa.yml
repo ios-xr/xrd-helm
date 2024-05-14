@@ -1,0 +1,35 @@
+name: version-increment
+
+on:
+  pull_request:
+    branches:
+      - 'main'
+      - 'preview-[0-9]+\.[0-9]+\.[0-9]+'
+    paths-ignore:
+      - '.gitignore'
+      - '*.md'
+  push:
+    branches:
+      - 'gh-actions*'
+
+jobs:
+  helm:
+    runs-on: ubuntu-latest
+    name: 'version-increment-check'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.7'
+
+      - uses: azure/setup-helm@v3
+        with:
+          version: '3.10.0'
+
+      - uses: helm/chart-testing-action@v2.3.1
+
+      - name: Run chart-testing (check-version-increment)
+        run: ct lint --config .github/config/ct-version-increment.yml --target-branch ${{ github.event.repository.default_branch }}
