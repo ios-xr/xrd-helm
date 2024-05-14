@@ -1,0 +1,54 @@
+{{- /* Generate the Job for host-check-app. */ -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hostCheck.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "hostCheck.commonLabels" . | nindent 4 }}
+spec:
+  replicas: 1
+  serviceName: {{ include "hostCheck.fullname" . }}
+  selector:
+    matchLabels:
+      {{- include "hostCheck.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "hostCheck.commonLabels" . | nindent 8 }}
+    spec:
+      hostNetwork: true
+      {{- end }}
+      volumes:
+      - name: modules
+        hostPath:
+          path: /lib/modules
+          type: DirectoryOrCreate
+      containers:
+      {{- $repo := required "Image repository must be specified" .Values.image.repository }}
+      {{- $tag := required "Image tag must be specified" .Values.image.tag }}
+      - image: {{ printf "\"%s:%s\"" $repo $tag }}
+        {{- if $resources }}
+        name: main
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: modules
+          mountPath: /lib/modules
+          readOnly: true
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}  {{- end }}
+  backoffLimit: 0

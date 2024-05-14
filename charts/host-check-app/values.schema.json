@@ -1,0 +1,58 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema",
+  "$id": "http://cisco.com/xrd/helm",
+  "title": "host-check-app Helm Chart Values",
+  "description": "Configuration values for the host-check-app helm charts",
+  "type": "object",
+  "properties": {
+    "image": {
+      "description": "Container image config",
+      "type": "object",
+      "properties": {
+        "repository": {
+          "description": "Repository to pull the image from (required)",
+          "type": "string"
+        },
+        "tag": {
+          "description": "Image tag to pull from the repository (required)",
+          "type": "string"
+        },
+        "pullPolicy": {
+          "description": "Standard Kubernetes image pull policy",
+          "type": "string",
+          "default": "Always",
+          "enum": [
+            "Always",
+            "IfNotPresent",
+            "Never"
+          ]
+        },
+        "pullSecrets": {
+          "description": "Standard Kuberenetes pod imagePullSecrets array",
+          "type": "array"
+        }
+      },
+      "required": [
+        "repository",
+        "tag"
+      ],
+      "additionalProperties": false
+    },
+    "nodeSelector": {
+      "description": "Standard Kubernetes pod nodeSelector object",
+      "type": "object"
+    },
+    "tolerations": {
+      "description": "Standard Kubernetes pod tolerations array",
+      "type": "array"
+    },
+    "affinity": {
+      "description": "Standard Kubernetes pod affinity object",
+      "type": "object"
+    }
+  },
+  "required": [
+    "image"
+  ],
+  "additionalProperties": false
+}
