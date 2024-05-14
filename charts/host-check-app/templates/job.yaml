@@ -27,7 +27,6 @@ spec:
       {{- $repo := required "Image repository must be specified" .Values.image.repository }}
       {{- $tag := required "Image tag must be specified" .Values.image.tag }}
       - image: {{ printf "\"%s:%s\"" $repo $tag }}
-        {{- if $resources }}
         name: main
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         volumeMounts:
