@@ -394,6 +394,12 @@ setup_file () {
     assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1"
 }
 
+@test "vRouter StatefulSet: XR_MGMT_INTERFACES container env vars is correctly set when sriov interface is present" {
+    template --set-json 'mgmtInterfaces=[{"type": "multus"}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "foo/bar"}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net2"
+}
+
 @test "vRouter StatefulSet: set snoopIpv4Address flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv4Address": true}]'
     assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1,snoop_v4"

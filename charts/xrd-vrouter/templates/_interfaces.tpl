@@ -77,7 +77,7 @@
 {{- define "xrd-vr.mgmtInterfaces" -}}
 {{- /* Generate the XR_MGMT_INTERFACES environment variable content */ -}}
 {{- $interfaces := list }}
-{{- $cniIndex := atoi (include "xrd.interfaces.multusCount" .Values.interfaces) }}
+{{- $cniIndex := atoi (include "xrd.interfaces.cniInterfaceCount" .Values.interfaces) }}
 {{- if gt (len .Values.mgmtInterfaces) 1 }}
   {{- fail "Only one management interface can be specified on XRd vRouter" }}
 {{- end }}

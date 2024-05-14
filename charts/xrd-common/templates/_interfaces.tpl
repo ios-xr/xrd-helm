@@ -1,8 +1,8 @@
 {{- /* Helper templates */ -}}
-{{- define "xrd.interfaces.multusCount" -}}
+{{- define "xrd.interfaces.cniInterfaceCount" -}}
 {{- $c := 0 }}
 {{- range . }}
-  {{- if eq .type "multus" }}
+  {{- if or (eq .type "multus") (eq .type "sriov") }}
     {{- $c = add1 $c }}
   {{- end }}
 {{- end }}

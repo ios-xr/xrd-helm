@@ -34,7 +34,7 @@
 {{- define "xrd-cp.mgmtInterfaces" -}}
 {{- /* Generate the XR_MGMT_INTERFACES environment variable content */ -}}
 {{- $interfaces := list }}
-{{- $cniIndex := atoi (include "xrd.interfaces.multusCount" .Values.interfaces) }}
+{{- $cniIndex := atoi (include "xrd.interfaces.cniInterfaceCount" .Values.interfaces) }}
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
 {{- range .Values.mgmtInterfaces }}
   {{- if eq .type "defaultCni" }}
