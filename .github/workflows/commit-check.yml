@@ -34,10 +34,5 @@ jobs:
 
       - uses: docker/setup-buildx-action@v3
 
-      - uses: docker/build-push-action@v5
-        with:
-          context: "tests"
-          load: true
-
       - name: Run all tests
         run: scripts/commit-check
