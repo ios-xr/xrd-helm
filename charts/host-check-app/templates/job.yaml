@@ -18,7 +18,6 @@ spec:
         {{- include "hostCheck.commonLabels" . | nindent 8 }}
     spec:
       hostNetwork: true
-      {{- end }}
       volumes:
       - name: modules
         hostPath:
