@@ -7,11 +7,6 @@ metadata:
   labels:
     {{- include "hostCheck.labels" . | nindent 4 }}
 spec:
-  replicas: 1
-  serviceName: {{ include "hostCheck.fullname" . }}
-  selector:
-    matchLabels:
-      {{- include "hostCheck.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
