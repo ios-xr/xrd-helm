@@ -5,7 +5,7 @@ metadata:
   name: {{ include "hostCheck.fullname" . }}
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "hostCheck.commonLabels" . | nindent 4 }}
+    {{- include "hostCheck.labels" . | nindent 4 }}
 spec:
   replicas: 1
   serviceName: {{ include "hostCheck.fullname" . }}
@@ -15,7 +15,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "hostCheck.commonLabels" . | nindent 8 }}
+        {{- include "hostCheck.labels" . | nindent 8 }}
     spec:
       hostNetwork: true
       volumes:
