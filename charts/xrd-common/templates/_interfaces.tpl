@@ -1,13 +1,4 @@
 {{- /* Helper templates */ -}}
-{{- define "xrd.interfaces.cniInterfaceCount" -}}
-{{- $c := 0 }}
-{{- range . }}
-  {{- if or (eq .type "multus") (eq .type "sriov") }}
-    {{- $c = add1 $c }}
-  {{- end }}
-{{- end }}
-{{- $c }}
-{{- end -}}
 
 {{- define "xrd.interfaces.anyMultus" -}}
 {{- /*
@@ -115,7 +106,8 @@ or an empty string otherwise.
 {{- range $idx, $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
   {{- if eq $intf.type "multus" }}
     {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $idx }}
-    {{- $entry := dict "name" $netname }}
+    {{- $intfname := printf "net%d" $idx }}
+    {{- $entry := dict "name" $netname "interface" $intfname}}
     {{- if $intf.attachmentConfig }}
     {{- $entry = merge $entry $intf.attachmentConfig }}
     {{- end }}
@@ -123,7 +115,8 @@ or an empty string otherwise.
   {{- end }}
   {{- if eq $intf.type "sriov" }}
     {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $idx }}
-    {{- $entry := dict "name" $netname }}
+    {{- $intfname := printf "net%d" $idx }}
+    {{- $entry := dict "name" $netname "interface" $intfname}}
     {{- $nets = append $nets $entry }}
   {{- end }}
 {{- end }}

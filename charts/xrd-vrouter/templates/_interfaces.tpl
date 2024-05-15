@@ -77,12 +77,13 @@
 {{- define "xrd-vr.mgmtInterfaces" -}}
 {{- /* Generate the XR_MGMT_INTERFACES environment variable content */ -}}
 {{- $interfaces := list }}
-{{- $cniIndex := atoi (include "xrd.interfaces.cniInterfaceCount" .Values.interfaces) }}
+{{- $idx := sub (len .Values.interfaces) 1 }}
 {{- if gt (len .Values.mgmtInterfaces) 1 }}
   {{- fail "Only one management interface can be specified on XRd vRouter" }}
 {{- end }}
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
 {{- range .Values.mgmtInterfaces }}
+  {{- $idx = add1 $idx }}
   {{- if eq .type "defaultCni" }}
     {{- if (hasKey . "xrName") }}
       {{- fail "xrName may not be specified for interfaces on XRd vRouter" }}
@@ -94,15 +95,14 @@
       {{- $interfaces = append $interfaces "linux:eth0" }}
     {{- end }}
   {{- else if eq .type "multus" }}
-    {{- $cniIndex = add1 $cniIndex }}
     {{- if (hasKey . "xrName") }}
       {{- fail "xrName may not be specified for interfaces on XRd vRouter" }}
     {{- end }}
     {{- $flags := include "xrd.interfaces.linuxflags" . }}
     {{- if $flags }}
-      {{- $interfaces = append $interfaces (printf "linux:net%d,%s" $cniIndex $flags) }}
+      {{- $interfaces = append $interfaces (printf "linux:net%d,%s" $idx $flags) }}
     {{- else }}
-      {{- $interfaces = append $interfaces (printf "linux:net%d" $cniIndex) }}
+      {{- $interfaces = append $interfaces (printf "linux:net%d" $idx) }}
     {{- end }}
   {{- else }}
     {{- fail (printf "Invalid mgmt interface type %s" .type) }}

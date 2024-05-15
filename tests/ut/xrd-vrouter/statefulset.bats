@@ -110,7 +110,7 @@ setup_file () {
 @test "vRouter StatefulSet: .spec.template annotations are added for multus interfaces" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
-        "[\n  {\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
+        "[\n  {\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
 }
 
 @test "vRouter StatefulSet: .spec.template podAnnotations can be set" {
@@ -122,7 +122,7 @@ setup_file () {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]' \
         --set-json 'interfaces=[{"type": "sriov", "resource": "baz"}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
-        "[\n  {\n    \"name\": \"release-name-xrd-vrouter-0\"\n  },\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-vrouter-1\"\n  }\n]"
+        "[\n  {\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  },\n  {\n    \"foo\": \"bar\",\n    \"interface\": \"net1\",\n    \"name\": \"release-name-xrd-vrouter-1\"\n  }\n]"
 }
 
 @test "vRouter StatefulSet: .spec.template recommended labels are set" {
@@ -391,41 +391,41 @@ setup_file () {
 
 @test "vRouter StatefulSet: XR_MGMT_INTERFACES container env vars is correctly set" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0"
 }
 
 @test "vRouter StatefulSet: XR_MGMT_INTERFACES container env vars is correctly set when sriov interface is present" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]' \
         --set-json 'interfaces=[{"type": "sriov", "resource": "foo/bar"}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net2"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1"
 }
 
 @test "vRouter StatefulSet: set snoopIpv4Address flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv4Address": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1,snoop_v4"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v4"
 }
 
 @test "vRouter StatefulSet: set snoopIpv4DefaultRoot flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv4DefaultRoute": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1,snoop_v4_default_route"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v4_default_route"
 }
 
 @test "vRouter StatefulSet: set snoopIpv6Address flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv6Address": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1,snoop_v6"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v6"
 }
 
 @test "vRouter StatefulSet: set snoopIpv6DefaultRoot flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv6DefaultRoute": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1,snoop_v6_default_route"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v6_default_route"
 }
 
 @test "vRouter StatefulSet: set chksum flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "chksum": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1,chksum"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,chksum"
 }
 
-@test "vRouter StatefulSet: xrName flag  is not allowed for vRouter" {
+@test "vRouter StatefulSet: xrName flag is not allowed for vRouter" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "multus", "xrName": "foo"}]'
     assert_error_message_contains "xrName may not be specified for interfaces on XRd vRouter"
 }

@@ -66,13 +66,13 @@ setup_file () {
 @test "vRouter NetworkAttachmentDefinition (multus): Check default config" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"plugins\": [\n    null\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\": [\n    null\n  ]\n}"
 }
 
 @test "vRouter NetworkAttachmentDefinition (multus): Config can be set" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Name consists of the release name, template name and index" {

@@ -100,7 +100,7 @@ setup_file () {
 @test "Control Plane StatefulSet: .spec.template annotations are added for multus interfaces" {
     template --set-json 'interfaces=[{"type": "multus"}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
-        "[\n  {\n    \"name\": \"release-name-xrd-control-plane-0\"\n  }\n]"
+        "[\n  {\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-control-plane-0\"\n  }\n]"
 }
 
 @test "Control Plane StatefulSet: .spec.template podAnnotations can be set" {
@@ -111,7 +111,7 @@ setup_file () {
 @test "Control Plane StatefulSet: podNetworkAnnotations contain the desired information" {
     template --set-json 'interfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}, "config": {"baz": "baa"}}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
-        "[\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-control-plane-0\"\n  }\n]"
+        "[\n  {\n    \"foo\": \"bar\",\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-control-plane-0\"\n  }\n]"
 }
 
 @test "Control Plane StatefulSet: .spec.template recommended labels are set" {
@@ -330,37 +330,42 @@ setup_file () {
 
 @test "Control Plane StatefulSet: XR_INTERFACES container env vars is correctly set" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni"}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0"
 }
 
 @test "Control Plane StatefulSet: set snoopIpv4Address flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "snoopIpv4Address": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,snoop_v4"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0,snoop_v4"
 }
 
 @test "Control Plane StatefulSet: set snoopIpv4DefaultRoot flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "snoopIpv4DefaultRoute": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,snoop_v4_default_route"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0,snoop_v4_default_route"
 }
 
 @test "Control Plane StatefulSet: set snoopIpv6Address flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "snoopIpv6Address": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,snoop_v6"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0,snoop_v6"
 }
 
 @test "Control Plane StatefulSet: set snoopIpv6DefaultRoot flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "snoopIpv6DefaultRoute": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,snoop_v6_default_route"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0,snoop_v6_default_route"
 }
 
 @test "Control Plane StatefulSet: set chksum flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "chksum": true}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,chksum"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0,chksum"
 }
 
 @test "Control Plane StatefulSet: set xrName flag in XR_INTERFACES" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni", "xrName": "foo"}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net1;linux:eth0,xr_name=foo"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0,xr_name=foo"
+}
+
+@test "Control Plane StatefulSet: multiple multus interfaces" {
+    template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni"}, {"type": "multus"}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0;linux:net2"
 }
 
 @test "Control Plane StatefulSet: don't set unsupported flags XR_INTERFACES" {
@@ -370,7 +375,7 @@ setup_file () {
 
 @test "Control Plane StatefulSet: XR_MGMT_INTERFACES container env vars is correctly set" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "chksum": true}, {"type": "defaultCni"}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1,chksum;linux:eth0"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,chksum;linux:eth0"
 }
 
 @test "Control Plane StatefulSet: XR_DISK_USAGE_LIMIT is set if persistence is enabled with default value" {
