@@ -10,6 +10,9 @@ vrouter_chart_dir () {
 common_chart_dir () {
     readlink -f "${BATS_TEST_DIRNAME}/../../../charts/xrd-common"
 }
+host-check_chart_dir () {
+    readlink -f "${BATS_TEST_DIRNAME}/../../../charts/host-check-app"
+}
 
 template () {
     echo -n "# Run 'helm template'"

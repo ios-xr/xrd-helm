@@ -26,27 +26,12 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
-Selector labels
-*/}}
-{{- define "hostCheck.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "hostCheck.name" . }}
-app.kubernetes.io/instance: {{ .Release.Name }}
-{{- end }}
-
-{{/*
 Standard labels
 */}}
 {{- define "hostCheck.labels" -}}
 helm.sh/chart: {{ include "hostCheck.chart" . }}
-{{ include "hostCheck.selectorLabels" . }}
+app.kubernetes.io/name: {{ include "hostCheck.name" . }}
+app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Values.image.tag | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
-
-{{/*
-Common labels for immutable resources
-*/}}
-{{- define "hostCheck.commonImmutableLabels" -}}
-{{- include "hostCheck.selectorLabels" . }}
-app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- end -}}
