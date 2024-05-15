@@ -44,24 +44,9 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
 
 {{/*
-Common labels for all mutable resources
-*/}}
-{{- define "hostCheck.commonLabels" -}}
-{{- include "hostCheck.labels" . }}
-{{- /* Merge has left-precedence (i.e. things in common override things in global). */}}
-{{- $cLabels := merge .Values.commonLabels .Values.global.labels }}
-{{- if $cLabels }}
-{{ $cLabels | toYaml }}
-{{- end }}
-{{- end -}}
-
-{{/*
 Common labels for immutable resources
 */}}
 {{- define "hostCheck.commonImmutableLabels" -}}
 {{- include "hostCheck.selectorLabels" . }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
-{{- with (merge .Values.commonLabels .Values.global.labels) }}
-{{ toYaml . }}
-{{- end }}
 {{- end -}}
