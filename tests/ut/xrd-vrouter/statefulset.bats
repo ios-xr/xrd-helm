@@ -530,7 +530,7 @@ setup_file () {
 
 @test "vRouter StatefulSet: network-status annotation is mounted if there is sriov network" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/xrd"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/xrd/network-status"
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "network-status-annotation"
 }
 

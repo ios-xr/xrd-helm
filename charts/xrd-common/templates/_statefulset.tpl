@@ -128,6 +128,10 @@ spec:
           name: config
           readOnly: true
         {{- end }}
+        {{- if (include "xrd.mountNetworkStatusAnnotation" .) }}
+        - mountPath: "/etc/xrd/network-status"
+          name: "network-status-annotation"
+        {{- end }}
         {{- if .Values.persistence.enabled }}
         - mountPath: /xr-storage
           name: xr-storage
@@ -138,10 +142,6 @@ spec:
         {{- end }}
         {{- if .Values.extraVolumeMounts }}
         {{- toYaml .Values.extraVolumeMounts | nindent 8 }}
-        {{- end }}
-        {{- if (include "xrd.mountNetworkStatusAnnotation" .) }}
-        - mountPath: "/etc/xrd"
-          name: "network-status-annotation"
         {{- end }}
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
