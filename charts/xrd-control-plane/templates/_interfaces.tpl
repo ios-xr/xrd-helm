@@ -5,7 +5,7 @@
 {{- $hasPciRange := 0 }}
 {{- $cniIndex := 0 }}
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
-{{- range $idx, $intf:= .Values.interfaces }}
+{{- range .Values.interfaces }}
   {{- if eq .type "defaultCni" }}
     {{- if hasKey . "attachmentConfig" }}
       {{- fail "attachmentConfig may not be specified for defaultCni interfaces" }}
