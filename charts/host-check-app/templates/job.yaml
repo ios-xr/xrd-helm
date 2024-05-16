@@ -28,7 +28,7 @@ spec:
         - name: modules
           mountPath: /lib/modules
           readOnly: true
-        command: [{{ include "hostCheck.args" . | quote }}]
+        args: [{{ include "hostCheck.args" . | quote }}]
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 6 }}
