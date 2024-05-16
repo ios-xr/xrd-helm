@@ -38,6 +38,17 @@
       ],
       "additionalProperties": false
     },
+    "platforms": {
+      "description": "List of platforms to run the host-check-app on",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "xrd-control-plane",
+          "xrd-vrouter"
+        ]
+      }
+    },
     "nodeSelector": {
       "description": "Standard Kubernetes pod nodeSelector object",
       "type": "object"
@@ -52,7 +63,8 @@
     }
   },
   "required": [
-    "image"
+    "image",
+    "platforms"
   ],
   "additionalProperties": false
 }

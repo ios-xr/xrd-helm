@@ -35,3 +35,23 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 app.kubernetes.io/version: {{ .Values.image.tag | quote }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end }}
+
+{{/*
+Runtime arguments. If both xrd-control-plane and xrd-vrouter are specified,
+the argument is not set.
+*/}}
+{{- define "hostCheck.args" -}}
+{{- if not .Values.platforms }}
+  {{- fail "Platforms must be specified" }}
+{{- end }}
+{{- range $platform := .Values.platforms }}
+{{- if and (not (eq $platform "xrd-control-plane")) (not (eq $platform "xrd-vrouter")) }}
+  {{- fail "Invalid platform specified: must be one of xrd-control-plane or xrd-vrouter" }}
+{{- end }}
+{{- end }}
+{{- $arg := "" }}
+{{- if eq (len .Values.platforms) 1 }}
+  {{- $arg = printf "-p%s" (.Values.platforms | first) }}
+{{- end }}
+{{- $arg }}
+{{- end }}

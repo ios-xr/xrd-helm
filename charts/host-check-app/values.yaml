@@ -19,6 +19,10 @@ image:
   # See https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
   pullSecrets: []
 
+# Host-check-app configuration
+# List of platforms to run host-check-app for.
+platforms: []
+
 # Location control for the host-check-app Pod.
 # Standard K8s configuration, more information available at:
 # https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
