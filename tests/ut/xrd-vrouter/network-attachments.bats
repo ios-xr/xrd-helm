@@ -76,35 +76,35 @@ setup_file () {
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Name consists of the release name, template name and index" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
     assert_query_equal '.metadata.name' "release-name-xrd-vrouter-0"
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Name can be overridden with fullnameOverride" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
         --set 'fullnameOverride=xrd-test'
     assert_query_equal '.metadata.name' "xrd-test-0"
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Name can be overridden with nameOverride" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
         --set 'nameOverride=xrd-test'
     assert_query_equal '.metadata.name' "release-name-xrd-test-0"
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Namespace is default" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
     assert_query_equal '.metadata.namespace' "default"
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Default annotations are set" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
     assert_query_equal '.metadata.annotations."k8s.v1.cni.cncf.io/resourceName"' "foo"
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Global annotations and commonAnnotations can be added and are correctly merged" {
     template \
-        --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
         --set 'global.annotations.foo=bar' \
         --set 'commonAnnotations.baz=baa'
     assert_query_equal '.metadata.annotations."k8s.v1.cni.cncf.io/resourceName"' "foo"
@@ -113,7 +113,7 @@ setup_file () {
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Recommended labels are set" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
     assert_query_equal '.metadata.labels."app.kubernetes.io/name"' "xrd-vrouter"
     assert_query_equal '.metadata.labels."app.kubernetes.io/instance"' "release-name"
     assert_query_equal '.metadata.labels."app.kubernetes.io/managed-by"' "Helm"
@@ -123,44 +123,27 @@ setup_file () {
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Global labels and commonLabels can be added and are correctly merged" {
     template \
-        --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
         --set 'global.labels.foo=bar' \
         --set 'commonLabels.baz=baa'
     assert_query_equal '.metadata.labels.foo' "bar"
     assert_query_equal '.metadata.labels.baz' "baa"
 }
 
-@test "vRouter NetworkAttachmentDefinition (sriov): Check default config" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"host-device\"\n}"
-}
-
 @test "vRouter NetworkAttachmentDefinition (sriov): Config can be set" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"bar": "baz"}}]'
-    assert_query_equal '.spec.config' \
-        "{\n  \"bar\": \"baz\",\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"host-device\"\n}"
-}
-
-@test "vRouter NetworkAttachmentDefinition (sriov): CNI type can be overridden" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"type\": \"sriov\"\n}"
-}
-
-@test "vRouter NetworkAttachmentDefinition (sriov): Only sriov or host-device CNI are supported" {
-    template_failure --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "foo"}}]'
-    assert_error_message_contains "config.type for sriov interfaces must be one of: sriov, host-device."
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\": [\n    {\n      \"type\": \"sriov\"\n    }\n  ]\n}"
 }
 
 @test "vRouter NetworkAttachmentDefinition: multiple sriov interfaces can be created together" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"},{"type": "sriov", "resource": "bar"}]'
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}},{"type": "sriov", "resource": "bar", "config": {"type": "sriov"}}]'
     assert_query_equal '.metadata.name' \
         "release-name-xrd-vrouter-0\n---\nrelease-name-xrd-vrouter-1"
 }
 
 @test "vRouter NetworkAttachmentDefinition: sriov interfaces and multus mgmt interfaces can be created together" {
-    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]' \
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
         --set-json 'mgmtInterfaces=[{"type": "multus"}]'
     assert_query_equal '.metadata.name' \
         "release-name-xrd-vrouter-0\n---\nrelease-name-xrd-vrouter-1"

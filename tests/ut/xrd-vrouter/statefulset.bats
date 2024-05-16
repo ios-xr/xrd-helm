@@ -370,10 +370,10 @@ setup_file () {
 
 @test "vRouter StatefulSet: XR_INTERFACES container env vars is correctly set" {
     template --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}}, {"type": "sriov", "resource": "foo/bar"}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "pci:00:00.0;net-attach-def:default/release-name-xrd-vrouter-1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "pci:00:00.0;net-attach-def:default/release-name-xrd-vrouter-0"
 }
 
-@test "vRouter StatefulSet: XR_INTERFACES container env vars is correctly set (sriov)" {
+@test "vRouter StatefulSet: XR_INTERFACES container env vars is correctly set (sriov) with name override" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo/bar"}]' \
        --set 'fullnameOverride=xrd-test'
     assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "net-attach-def:default/xrd-test-0"
@@ -530,7 +530,7 @@ setup_file () {
 
 @test "vRouter StatefulSet: network-status annotation is mounted if there is sriov network" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
-    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/xrd/network-status"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/xrd"
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "network-status-annotation"
 }
 

@@ -18,12 +18,21 @@ or an empty string otherwise.
 Returns a string equivalent to boolean true if there are any sriov network interfaces,
 or an empty string otherwise.
 */ -}}
-{{- $c := 0 }}
 {{- range .Values.interfaces }}
   {{- if eq .type "sriov" }}
 1
   {{- end }}
 {{- end }}
+{{- end -}}
+
+{{- define "xrd.interfaces.sriovCount" -}}
+{{- $c := 0 }}
+{{- range .Values.interfaces }}
+  {{- if eq .type "sriov" }}
+    {{- $c = add1 $c }}
+  {{- end }}
+{{- end }}
+{{- $c }}
 {{- end -}}
 
 {{- define "xrd.interfaces.checkDefaultCniCount" -}}

@@ -140,7 +140,7 @@ spec:
         {{- toYaml .Values.extraVolumeMounts | nindent 8 }}
         {{- end }}
         {{- if (include "xrd.mountNetworkStatusAnnotation" .) }}
-        - mountPath: "/etc/xrd/network-status"
+        - mountPath: "/etc/xrd"
           name: "network-status-annotation"
         {{- end }}
       {{- with .Values.image.pullSecrets }}
