@@ -96,17 +96,17 @@ setup_file () {
 
 @test "host-check-app Job: platform is vRouter" {
     template --set 'platforms[0]=xrd-vrouter'
-    assert_query_equal '.spec.template.spec.containers[0].args' "[\"-pxrd-vrouter\"]"
+    assert_query_equal '.spec.template.spec.containers[0].args' "[-p, xrd-vrouter]"
 }
 
 @test "host-check-app Job: platform is Control Plane" {
     template --set 'platforms[0]=xrd-control-plane'
-    assert_query_equal '.spec.template.spec.containers[0].args' "[\"-pxrd-control-plane\"]"
+    assert_query_equal '.spec.template.spec.containers[0].args' "[-p, xrd-control-plane]"
 }
 
 @test "host-check-app Job: both platforms are specified" {
     template --set 'platforms[0]=xrd-control-plane' --set 'platforms[1]=xrd-vrouter'
-    assert_query_equal '.spec.template.spec.containers[0].args' "[\"\"]"
+    assert_query_equal '.spec.template.spec.containers[0].args' "[]"
 }
 
 @test "host-check-app Job: container imagePullSecrets can be set" {

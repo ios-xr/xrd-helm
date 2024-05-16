@@ -51,7 +51,7 @@ the argument is not set.
 {{- end }}
 {{- $arg := "" }}
 {{- if eq (len .Values.platforms) 1 }}
-  {{- $arg = printf "-p%s" (.Values.platforms | first) }}
+  {{- $arg = printf "-p, %s" (.Values.platforms | first) }}
 {{- end }}
 {{- $arg }}
 {{- end }}
