@@ -11,7 +11,7 @@ common_chart_dir () {
     readlink -f "${BATS_TEST_DIRNAME}/../../../charts/xrd-common"
 }
 host-check_chart_dir () {
-    readlink -f "${BATS_TEST_DIRNAME}/../../../charts/host-check-app"
+    readlink -f "${BATS_TEST_DIRNAME}/../../../charts/host-check"
 }
 
 template () {

@@ -36,3 +36,7 @@ jobs:
       - name: "Run vRouter unit tests"
         run: |
           docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter
+
+      - name: "Run host-check unit tests"
+        run: |
+          docker run -v "$PWD/:/charts" helm-tests bats tests/ut/host-check
