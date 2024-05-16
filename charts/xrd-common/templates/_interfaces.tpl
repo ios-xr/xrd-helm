@@ -25,10 +25,10 @@ or an empty string otherwise.
 {{- end }}
 {{- end -}}
 
-{{- define "xrd.interfaces.sriovCount" -}}
+{{- define "xrd.interfaces.cniCount" -}}
 {{- $c := 0 }}
 {{- range .Values.interfaces }}
-  {{- if eq .type "sriov" }}
+  {{- if or (eq .type "sriov") (eq .type "multus") }}
     {{- $c = add1 $c }}
   {{- end }}
 {{- end }}
@@ -112,21 +112,24 @@ or an empty string otherwise.
 
 {{- define "xrd.podNetworkAnnotations" -}}
 {{- $nets := list }}
-{{- range $idx, $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
+{{- $cniIndex := 0}}
+{{- range $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
   {{- if eq $intf.type "multus" }}
-    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $idx }}
-    {{- $intfname := printf "net%d" $idx }}
+    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $cniIndex }}
+    {{- $intfname := printf "net%d" $cniIndex }}
     {{- $entry := dict "name" $netname "interface" $intfname}}
     {{- if $intf.attachmentConfig }}
     {{- $entry = merge $entry $intf.attachmentConfig }}
     {{- end }}
     {{- $nets = append $nets $entry }}
+    {{- $cniIndex = add1 $cniIndex }}
   {{- end }}
   {{- if eq $intf.type "sriov" }}
-    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $idx }}
-    {{- $intfname := printf "net%d" $idx }}
+    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $cniIndex }}
+    {{- $intfname := printf "net%d" $cniIndex }}
     {{- $entry := dict "name" $netname "interface" $intfname}}
     {{- $nets = append $nets $entry }}
+    {{- $cniIndex = add1 $cniIndex }}
   {{- end }}
 {{- end }}
 {{- toPrettyJson $nets }}

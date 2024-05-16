@@ -365,7 +365,7 @@ setup_file () {
 
 @test "Control Plane StatefulSet: multiple multus interfaces" {
     template --set-json 'interfaces=[{"type": "multus"}, {"type": "defaultCni"}, {"type": "multus"}]'
-    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0;linux:net2"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "linux:net0;linux:eth0;linux:net1"
 }
 
 @test "Control Plane StatefulSet: don't set unsupported flags XR_INTERFACES" {

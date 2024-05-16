@@ -4,7 +4,7 @@
 {{- $hasPci := 0 }}
 {{- $hasNetwork := 0 }}
 {{- $hasPciRange := 0 }}
-{{- $cniIndex := -1 }}
+{{- $cniIndex := 0 }}
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
 {{- range $intf := .Values.interfaces }}
   {{- if eq .type "pci" }}
@@ -51,7 +51,6 @@
       {{- fail "Must specify one of 'device', 'first', or 'last' for PCI interfaces" }}
     {{- end }}
   {{- else if eq .type "sriov" }}
-    {{- $cniIndex = add1 $cniIndex }}
     {{- if hasKey . "attachmentConfig" }}
       {{- fail "attachmentConfig may not be specified for sriov interface types" }}
     {{- end }}
@@ -68,6 +67,7 @@
     {{- else }}
       {{- $interfaces = append $interfaces (printf "net-attach-def:%s/%s-%d" $.Release.Namespace (include "xrd.fullname" $) $cniIndex) }}
     {{- end }}
+    {{- $cniIndex = add1 $cniIndex }}
   {{- else }}
     {{- fail (printf "Invalid interface type %s" .type) }}
   {{- end }}
@@ -78,7 +78,7 @@
 {{- define "xrd-vr.mgmtInterfaces" -}}
 {{- /* Generate the XR_MGMT_INTERFACES environment variable content */ -}}
 {{- $interfaces := list }}
-{{- $cniIndex := sub (include "xrd.interfaces.sriovCount" .) 1 }}
+{{- $cniIndex := atoi (include "xrd.interfaces.cniCount" .) }}
 {{- if gt (len .Values.mgmtInterfaces) 1 }}
   {{- fail "Only one management interface can be specified on XRd vRouter" }}
 {{- end }}
@@ -95,7 +95,6 @@
       {{- $interfaces = append $interfaces "linux:eth0" }}
     {{- end }}
   {{- else if eq .type "multus" }}
-    {{- $cniIndex = add1 $cniIndex }}
     {{- if (hasKey . "xrName") }}
       {{- fail "xrName may not be specified for interfaces on XRd vRouter" }}
     {{- end }}
@@ -105,6 +104,7 @@
     {{- else }}
       {{- $interfaces = append $interfaces (printf "linux:net%d" $cniIndex) }}
     {{- end }}
+    {{- $cniIndex = add1 $cniIndex }}
   {{- else }}
     {{- fail (printf "Invalid mgmt interface type %s" .type) }}
   {{- end }}

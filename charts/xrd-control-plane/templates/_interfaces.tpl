@@ -3,6 +3,7 @@
 {{- $interfaces := list }}
 {{- $hasPci := 0 }}
 {{- $hasPciRange := 0 }}
+{{- $cniIndex := 0 }}
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
 {{- range $idx, $intf:= .Values.interfaces }}
   {{- if eq .type "defaultCni" }}
@@ -18,10 +19,11 @@
   {{- else if eq .type "multus" }}
     {{- $flags := include "xrd.interfaces.linuxflags" . }}
     {{- if $flags }}
-      {{- $interfaces = append $interfaces (printf "linux:net%d,%s" $idx $flags) }}
+      {{- $interfaces = append $interfaces (printf "linux:net%d,%s" $cniIndex $flags) }}
     {{- else }}
-      {{- $interfaces = append $interfaces (printf "linux:net%d" $idx) }}
+      {{- $interfaces = append $interfaces (printf "linux:net%d" $cniIndex) }}
     {{- end }}
+    {{- $cniIndex = add1 $cniIndex }}
   {{- else }}
     {{- fail (printf "Invalid interface type %s" .type) }}
   {{- end }}
@@ -32,10 +34,9 @@
 {{- define "xrd-cp.mgmtInterfaces" -}}
 {{- /* Generate the XR_MGMT_INTERFACES environment variable content */ -}}
 {{- $interfaces := list }}
-{{- $idx := sub (len .Values.interfaces) 1 }}
+{{- $cniIndex := atoi (include "xrd.interfaces.cniCount" .) }}
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
 {{- range .Values.mgmtInterfaces }}
-  {{- $idx = add1 $idx }}
   {{- if eq .type "defaultCni" }}
     {{- $flags := include "xrd.interfaces.linuxflags" . }}
     {{- if $flags }}
@@ -46,10 +47,11 @@
   {{- else if eq .type "multus" }}
     {{- $flags := include "xrd.interfaces.linuxflags" . }}
     {{- if $flags }}
-      {{- $interfaces = append $interfaces (printf "linux:net%d,%s" $idx $flags) }}
+      {{- $interfaces = append $interfaces (printf "linux:net%d,%s" $cniIndex $flags) }}
     {{- else }}
-      {{- $interfaces = append $interfaces (printf "linux:net%d" $idx) }}
+      {{- $interfaces = append $interfaces (printf "linux:net%d" $cniIndex) }}
     {{- end }}
+    {{- $cniIndex = add1 $cniIndex }}
   {{- else }}
     {{- fail (printf "Invalid mgmt interface type %s" .type) }}
   {{- end }}

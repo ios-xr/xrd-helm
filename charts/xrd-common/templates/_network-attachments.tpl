@@ -1,8 +1,7 @@
 {{- define "xrd.network-attachments" -}}
-{{- $cniIndex := -1 }}
+{{- $cniIndex := 0 }}
 {{- range $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
 {{- if or (eq $intf.type "multus") (eq $intf.type "sriov") }}
-{{- $cniIndex = add1 $cniIndex}}
 ---
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
@@ -30,6 +29,7 @@ spec:
       ]
     }
 ...
+{{- $cniIndex = add1 $cniIndex}}
 {{- end }}
 {{- end -}}
 {{- end -}}
