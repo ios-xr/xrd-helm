@@ -41,17 +41,11 @@ Runtime arguments. If both xrd-control-plane and xrd-vrouter are specified,
 the argument is not set.
 */}}
 {{- define "hostCheck.args" -}}
-{{- if not .Values.platforms }}
-  {{- fail "Platforms must be specified" }}
-{{- end }}
-{{- range $platform := .Values.platforms }}
-{{- if and (not (eq $platform "xrd-control-plane")) (not (eq $platform "xrd-vrouter")) }}
-  {{- fail "Invalid platform specified: must be one of xrd-control-plane or xrd-vrouter" }}
-{{- end }}
-{{- end }}
 {{- $arg := "" }}
-{{- if eq (len .Values.platforms) 1 }}
-  {{- $arg = printf "-p, %s" (.Values.platforms | first) }}
+{{- if and (has "xrd-control-plane" .Values.targetPlatforms) (has "xrd-vrouter" .Values.targetPlatforms) }}
+  {{- $arg = "" }}
+{{- else }}
+  {{- $arg = printf "-p, %s" (.Values.targetPlatforms | first) }}
 {{- end }}
 {{- $arg }}
 {{- end }}

@@ -1,5 +1,5 @@
 apiVersion: v2
-name: host-check-app
+name: host-check
 description: Cisco XRd host-check application
 type: application
 keywords:

@@ -1,1 +1,0 @@
-You have installed host-check-app version {{ .Values.image.tag }}.

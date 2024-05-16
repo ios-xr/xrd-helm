@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft-07/schema",
   "$id": "http://cisco.com/xrd/helm",
-  "title": "host-check-app Helm Chart Values",
-  "description": "Configuration values for the host-check-app helm charts",
+  "title": "host-check Helm Chart Values",
+  "description": "Configuration values for the host-check helm charts",
   "type": "object",
   "properties": {
     "image": {
@@ -38,8 +38,8 @@
       ],
       "additionalProperties": false
     },
-    "platforms": {
-      "description": "List of platforms to run the host-check-app on",
+    "targetPlatforms": {
+      "description": "List of platforms to run the host-check on",
       "type": "array",
       "items": {
         "type": "string",
@@ -52,19 +52,11 @@
     "nodeSelector": {
       "description": "Standard Kubernetes pod nodeSelector object",
       "type": "object"
-    },
-    "tolerations": {
-      "description": "Standard Kubernetes pod tolerations array",
-      "type": "array"
-    },
-    "affinity": {
-      "description": "Standard Kubernetes pod affinity object",
-      "type": "object"
     }
   },
   "required": [
     "image",
-    "platforms"
+    "targetPlatforms"
   ],
   "additionalProperties": false
 }

@@ -1,4 +1,4 @@
-{{- /* Generate the Job for host-check-app. */ -}}
+{{- /* Generate the Job for host-check. */ -}}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -37,13 +37,5 @@ spec:
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 6 }}
       {{- end }}
   backoffLimit: 0
