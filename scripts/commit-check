@@ -1,38 +1,9 @@
-#!/bin/bash
+#!/usr/bin/bash
 
 # This script runs all commit checks EXCEPT for checking that the version is
-# correctly incermented, which is done via a seperate github action on the
-# public xrd-helm repository.
+# correctly incermented, which is done via a seperate github action.
 
 set -e
-
-CONTAINER_TOOL="docker"
-
-usage() {
-    echo "Usage: $0 -t <docker|podman>"
-    exit 1
-}
-
-while getopts ":t:" opt; do
-    case $opt in
-        t)
-            CONTAINER_TOOL="$OPTARG"
-            ;;
-        \?)
-            echo "Invalid option: -$OPTARG" >&2
-            usage
-            ;;
-        :)
-            echo "Option -$OPTARG requires an argument." >&2
-            usage
-            ;;
-    esac
-done
-
-if [ "$CONTAINER_TOOL" != "docker" ] && [ "$CONTAINER_TOOL" != "podman" ]; then
-    echo "Error: Only 'docker' or 'podman' can be specified as the container tool."
-    usage
-fi
 
 function cleanup()
 {
@@ -89,44 +60,20 @@ if ! shellcheck scripts/{chart-releaser,commit-check}; then
     FAILURES=$((FAILURES+1))
 fi
 
-# Build container for UT and run tests using docker or podman
-if [ "$CONTAINER_TOOL" == "docker" ]; then
-    docker build tests/ -t helm-tests --network host
+podman build tests/ -t helm-tests --network host
 
-    echo
-    echo "Running Control Plane unit tests..."
-    if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
-        echo "Control Plane unit tests failed, check output and fix issues." >&2
-        FAILURES=$((FAILURES+1))
-    fi
+echo
+echo "Running Control Plane unit tests..."
+if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
+    echo "Control Plane unit tests failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+fi
 
-    echo
-    echo "Running vRouter unit tests..."
-    if ! docker run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
-        echo "vRouter unit tests failed, check output and fix issues." >&2
-        FAILURES=$((FAILURES+1))
-    fi
-elif [ "$CONTAINER_TOOL" == "podman" ]; then
-    podman build tests/ -t helm-tests --network host
-
-    echo
-    echo "Running Control Plane unit tests..."
-    if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
-        echo "Control Plane unit tests failed, check output and fix issues." >&2
-        FAILURES=$((FAILURES+1))
-    fi
-
-    echo
-    echo "Running vRouter unit tests..."
-    if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
-        echo "vRouter unit tests failed, check output and fix issues." >&2
-        FAILURES=$((FAILURES+1))
-    fi
-else
-    echo "Error: Unsupported container tool. Use 'docker' or 'podman'."
-    usage
-    # This should never be reached
-    exit 1
+echo
+echo "Running vRouter unit tests..."
+if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
+    echo "vRouter unit tests failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
 fi
 
 #=====================================================
