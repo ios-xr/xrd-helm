@@ -18,6 +18,8 @@ spec:
         hostPath:
           path: /lib/modules
           type: DirectoryOrCreate
+      securityContext:
+        fsGroup: 2000
       containers:
       {{- $repo := required "Image repository must be specified" .Values.image.repository }}
       {{- $tag := required "Image tag must be specified" .Values.image.tag }}
@@ -29,6 +31,14 @@ spec:
           mountPath: /lib/modules
           readOnly: true
         args: [{{ include "hostCheck.args" . }}]
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
       {{- with .Values.image.pullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 6 }}

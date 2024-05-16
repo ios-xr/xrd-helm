@@ -49,6 +49,11 @@ setup_file () {
     assert_query_equal '.spec.template.spec.volumes[0].hostPath.type' "DirectoryOrCreate"
 }
 
+@test "host-check Job: Pod security context is set" {
+    template --set 'targetPlatforms[0]=xrd-vrouter'
+    assert_query_equal '.spec.template.spec.securityContext.fsGroup' "2000"
+}
+
 @test "host-check: Image repository must be specified" {
     template_failure_no_set --set 'image.tag=latest' \
         --set 'targetPlatforms[0]=xrd-vrouter'
@@ -107,6 +112,15 @@ setup_file () {
 @test "host-check Job: both targetPlatforms are specified" {
     template --set 'targetPlatforms[0]=xrd-control-plane' --set 'targetPlatforms[1]=xrd-vrouter'
     assert_query_equal '.spec.template.spec.containers[0].args' "[]"
+}
+
+@test "host-check Job: Container securityContext is set" {
+    template --set 'targetPlatforms[0]=xrd-control-plane'
+    assert_query_equal '.spec.template.spec.containers[0].securityContext.capabilities.drop[0]' "ALL"
+    assert_query_equal '.spec.template.spec.containers[0].securityContext.allowPrivilegeEscalation' "false"
+    assert_query_equal '.spec.template.spec.containers[0].securityContext.readOnlyRootFilesystem' "true"
+    assert_query_equal '.spec.template.spec.containers[0].securityContext.runAsNonRoot' "true"
+    assert_query_equal '.spec.template.spec.containers[0].securityContext.runAsUser' "1000"
 }
 
 @test "host-check Job: container imagePullSecrets can be set" {
