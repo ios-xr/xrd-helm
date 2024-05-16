@@ -25,21 +25,23 @@ FAILURES=0
 echo "Setting up python venv..."
 TMP_VENV=$(mktemp -d -t venv.XXXXXX)
 python3 -m venv "$TMP_VENV"
-$TMP_VENV/bin/pip install --upgrade pip
-$TMP_VENV/bin/pip install PyYAML
+"$TMP_VENV"/bin/pip install --upgrade pip
+"$TMP_VENV"/bin/pip install PyYAML
 
 echo
 echo "Running version-increment dependency check"
 if ! ./scripts/check-dependency-version-increment; then
     echo "Version-increment dependency check failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
+else
+    echo "Version-increment dependency check passed."
 fi
 
 echo
 echo "Running helm lint..."
 args=("--set" "image.repository=repository" "--set" "image.tag=latest")
 error=false
-for chart in charts/*; do
+for chart in charts/{xrd-vrouter,xrd-control-plane}; do
     pushd "$chart"
     if ! (helm dependency update && helm lint "${args[@]}"); then
         error=true
@@ -48,7 +50,9 @@ for chart in charts/*; do
 done
 if [ $error = true ]; then
     FAILURES=$((FAILURES+1))
-    echo "helm lint failed, check output and fix errors" >&2
+    echo "Helm lint failed, check output and fix errors" >&2
+else
+    echo "Helm lint passed."
 fi
 
 echo
@@ -56,6 +60,8 @@ echo "Running shellcheck..."
 if ! shellcheck scripts/{chart-releaser,commit-check}; then
     echo "Shellcheck failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
+else
+    echo "Shellcheck passed."
 fi
 
 podman build tests/ -t helm-tests --network host
@@ -65,6 +71,8 @@ echo "Running Control Plane unit tests..."
 if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
     echo "Control Plane unit tests failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
+else
+    echo "Control Plane unit tests passed."
 fi
 
 echo
@@ -72,6 +80,8 @@ echo "Running vRouter unit tests..."
 if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
     echo "vRouter unit tests failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
+else
+    echo "vRouter unit tests passed."
 fi
 
 #=====================================================
