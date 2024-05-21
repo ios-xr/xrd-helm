@@ -45,6 +45,9 @@ labels: {}
 # Annotations added to the XRd deployment.
 annotations: {}
 
+# Pre-existing ServiceAccount for the XRd Pod to use.
+#serviceAccountName: ""
+
 # Pod resource configuration.
 # See https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
 # The default resources are:
@@ -191,7 +194,16 @@ config:
 #                - last: N, to use the final N network PCI devices.
 #                This can be specified as a line interface only.
 #                N.B. If PCI interfaces are specified with "first" or "last",
-#                that must be the ONLY "pci" interface definition.
+#                that must be the ONLY "pci" or "sriov" interface definition.
+#  - sriov:      This connects an additional network allocated from an SR-IOV
+#                network resource pool and created using a CNI plugin, driven
+#                by the multus meta-CNI plugin.
+#                An SR-IOV resource pool must be specified under the 'resource'
+#                key for the interface.
+#                The network attachment definition configuration must be
+#                specified under the 'config' field for the interface. Config
+#                is required to specify and configure the CNI used.
+#                This can be specified as a line interface only.
 #
 # On 'defaultCni' and 'multus' interfaces, the following options may also
 # be specified to control the interface behavior in XR:
@@ -213,9 +225,14 @@ interfaces: []
 # Example interfaces:
 #  config:
 #    device: 00.06.00:1
-#- type pci
+#- type: pci
 #  config:
 #    last: 3
+#- type: sriov
+#  resource: intel.com/intel_sriov_netdevice
+#  config:
+#    type: sriov
+#    vlan: 1
 
 # XRd management interfaces.
 mgmtInterfaces: []

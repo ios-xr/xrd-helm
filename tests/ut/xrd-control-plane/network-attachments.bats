@@ -112,6 +112,11 @@ setup_file () {
     assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""
 }
 
+@test "Control Plane NetworkAttachmentDefinition: error if sriov interface type is requested" {
+    template_failure --set-json 'interfaces=[{"type": "sriov"}]'
+    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""
+}
+
 @test "Control Plane NetworkAttachmentDefinition: error if unknown mgmt interface type is requested" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "foo"}]'
     assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""

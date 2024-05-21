@@ -40,7 +40,7 @@ spec:
         {{- if gt (len (include "xrd.commonAnnotations" . | fromYaml)) 0}}
         {{- include "xrd.commonAnnotations" . | nindent 8 }}
         {{- end }}
-        {{- if (include "xrd.interfaces.anyMultus" .) }}
+        {{- if or (include "xrd.interfaces.anyMultus" .) (include "xrd.interfaces.anySRIOV" .) }}
         k8s.v1.cni.cncf.io/networks: |-
           {{- include "xrd.podNetworkAnnotations" . | nindent 10 }}
         {{- end }}
@@ -53,6 +53,9 @@ spec:
         {{- toYaml . | nindent 8 }}
         {{- end }}
     spec:
+      {{- if .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      {{- end }}
       {{- if .Values.hostNetwork }}
       hostNetwork: true
       {{- end }}
@@ -91,6 +94,14 @@ spec:
           type: Directory
           {{- end }}
       {{- end }}
+      {{- if (include "xrd.mountNetworkStatusAnnotation" .) }}
+      - downwardAPI:
+          items:
+          - fieldRef:
+              fieldPath: metadata.annotations['k8s.v1.cni.cncf.io/network-status']
+            path: "network-status-annotation"
+        name: "network-status-annotation"
+      {{- end }}
       {{- if .Values.extraVolumes }}
       {{- toYaml .Values.extraVolumes | nindent 6 }}
       {{- end }}
@@ -116,6 +127,10 @@ spec:
         - mountPath: /etc/xrd
           name: config
           readOnly: true
+        {{- end }}
+        {{- if (include "xrd.mountNetworkStatusAnnotation" .) }}
+        - mountPath: "/etc/xrd/network-status"
+          name: "network-status-annotation"
         {{- end }}
         {{- if .Values.persistence.enabled }}
         - mountPath: /xr-storage

@@ -1,13 +1,4 @@
 {{- /* Helper templates */ -}}
-{{- define "xrd.interfaces.multusCount" -}}
-{{- $c := 0 }}
-{{- range . }}
-  {{- if eq .type "multus" }}
-    {{- $c = add1 $c }}
-  {{- end }}
-{{- end }}
-{{- $c }}
-{{- end -}}
 
 {{- define "xrd.interfaces.anyMultus" -}}
 {{- /*
@@ -20,6 +11,28 @@ or an empty string otherwise.
 1
   {{- end }}
 {{- end }}
+{{- end -}}
+
+{{- define "xrd.interfaces.anySRIOV" -}}
+{{- /*
+Returns a string equivalent to boolean true if there are any sriov network interfaces,
+or an empty string otherwise.
+*/ -}}
+{{- range .Values.interfaces }}
+  {{- if eq .type "sriov" }}
+1
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{- define "xrd.interfaces.cniCount" -}}
+{{- $c := 0 }}
+{{- range .Values.interfaces }}
+  {{- if or (eq .type "sriov") (eq .type "multus") }}
+    {{- $c = add1 $c }}
+  {{- end }}
+{{- end }}
+{{- $c }}
 {{- end -}}
 
 {{- define "xrd.interfaces.checkDefaultCniCount" -}}
@@ -86,16 +99,37 @@ or an empty string otherwise.
 {{- join "," $flags }}
 {{- end -}}
 
+{{- define "xrd.interfaces.sriovflags" -}}
+{{- $flags := list }}
+{{- $base := list "type" "config" "resource" }}
+{{- range $k, $v := . -}}
+  {{- if not (has $k $base) }}
+    {{- fail (printf "%s may not be specified for sriov interfaces" $k) }}
+  {{- end }}
+{{- end }}
+{{- join "," $flags }}
+{{- end -}}
+
 {{- define "xrd.podNetworkAnnotations" -}}
 {{- $nets := list }}
-{{- range $idx, $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
+{{- $cniIndex := 0}}
+{{- range $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
   {{- if eq $intf.type "multus" }}
-    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $idx }}
-    {{- $entry := dict "name" $netname }}
+    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $cniIndex }}
+    {{- $intfname := printf "net%d" $cniIndex }}
+    {{- $entry := dict "name" $netname "interface" $intfname}}
     {{- if $intf.attachmentConfig }}
     {{- $entry = merge $entry $intf.attachmentConfig }}
     {{- end }}
     {{- $nets = append $nets $entry }}
+    {{- $cniIndex = add1 $cniIndex }}
+  {{- end }}
+  {{- if eq $intf.type "sriov" }}
+    {{- $netname := printf "%s-%d" (include "xrd.fullname" $) $cniIndex }}
+    {{- $intfname := printf "net%d" $cniIndex }}
+    {{- $entry := dict "name" $netname "interface" $intfname}}
+    {{- $nets = append $nets $entry }}
+    {{- $cniIndex = add1 $cniIndex }}
   {{- end }}
 {{- end }}
 {{- toPrettyJson $nets }}

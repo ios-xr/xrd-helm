@@ -107,3 +107,10 @@ Convert a k8s resource specification of Mi or Gi into MiB for XR env vars.
 {{- end -}}
 {{ $out }}
 {{- end -}}
+
+{{- /*
+Should the NetworkStatusAnnotation be mounted?
+*/ -}}
+{{- define "xrd.mountNetworkStatusAnnotation" -}}
+{{- include "xrd.interfaces.anySRIOV" . -}}
+{{- end -}}

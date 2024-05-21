@@ -1,15 +1,21 @@
 {{- define "xrd.network-attachments" -}}
-{{- range $idx, $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
-{{- if eq $intf.type "multus" }}
+{{- $cniIndex := 0 }}
+{{- range $intf := concat .Values.interfaces .Values.mgmtInterfaces }}
+{{- if or (eq $intf.type "multus") (eq $intf.type "sriov") }}
 ---
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
-  name: {{ include "xrd.fullname" $ }}-{{ $idx }}
+  name: {{ include "xrd.fullname" $ }}-{{ $cniIndex }}
   namespace: {{ $.Release.Namespace }}
-  {{- if gt (len (include "xrd.commonAnnotations" $ | fromYaml)) 0 }}
+  {{- if or (gt (len (include "xrd.commonAnnotations" $ | fromYaml)) 0) (eq $intf.type "sriov") }}
   annotations:
-    {{- include "xrd.commonAnnotations" $ | nindent 4 }}
+    {{- if eq $intf.type "sriov" }}
+    k8s.v1.cni.cncf.io/resourceName: {{ $intf.resource }}
+    {{- end }}
+    {{- if gt (len (include "xrd.commonAnnotations" $ | fromYaml)) 0 }}
+      {{- include "xrd.commonAnnotations" $ | nindent 4 }}
+    {{- end }}
   {{- end }}
   labels:
     {{- include "xrd.commonLabels" $ | nindent 4 }}
@@ -22,6 +28,7 @@ spec:
       ]
     }
 ...
+{{- $cniIndex = add1 $cniIndex}}
 {{- end }}
 {{- end -}}
 {{- end -}}

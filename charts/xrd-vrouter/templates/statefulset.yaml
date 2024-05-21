@@ -74,6 +74,9 @@ Construct the resources including the default if that resource wasn't specified.
 {{- /* Generate the interface env vars */}}
 {{- $_ = set $env "XR_INTERFACES" (include "xrd-vr.interfaces" .) }}
 {{- $_ = set $env "XR_MGMT_INTERFACES" (include "xrd-vr.mgmtInterfaces" .) }}
+{{- if (include "xrd.mountNetworkStatusAnnotation" .) }}
+  {{- $_ = set $env "XR_NETWORK_STATUS_ANNOTATION_PATH" "/etc/xrd/network-status/network-status-annotation" }}
+{{- end }}
 
 {{- /* Create the args dict and invoke the generic template. */}}
 {{- $args := dict "root" $ "resources" $resources "environment" $env }}

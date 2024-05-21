@@ -81,6 +81,10 @@
       "description": "Annotations added to the XRd deployment",
       "type": "object"
     },
+    "serviceAccountName": {
+      "description": "Name of the service account to use for the XRd pod",
+      "type": "string"
+    },
     "resources": {
       "description": "Standard Kubernetes container resources object",
       "type": "object"
@@ -254,11 +258,16 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. Must be 'pci'",
+            "description": "Underlying interface type. Must be 'pci' or 'sriov'",
             "type": "string",
             "enum": [
-              "pci"
+              "pci",
+              "sriov"
             ]
+          },
+          "resource": {
+            "description": "Network resource to use for the interface",
+            "type": "string"
           },
           "config": {
             "description": "Type-dependent configuration",
@@ -278,7 +287,7 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. One of: 'defaultCni' or 'multus'",
+            "description": "Underlying interface type. One of: 'defaultCni' or 'multus'",
             "type": "string",
             "enum": [
               "defaultCni",
