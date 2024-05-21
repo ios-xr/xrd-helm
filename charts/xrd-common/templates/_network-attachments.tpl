@@ -23,7 +23,6 @@ spec:
   config: |-
     {
       "cniVersion": "0.3.1",
-      "name": "{{ include "xrd.fullname" $ }}-{{ $cniIndex }}",
       "plugins": [
         {{- $intf.config | toPrettyJson | nindent 8 }}
       ]

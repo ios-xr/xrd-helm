@@ -72,19 +72,19 @@ setup_file () {
 @test "Control Plane NetworkAttachmentDefinition: Check default config" {
     template --set-json 'interfaces=[{"type": "multus"}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\": [\n    null\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"plugins\": [\n    null\n  ]\n}"
 }
 
 @test "Control Plane NetworkAttachmentDefinition: Config can be set for MGMT interfaces" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}}]'
     assert_query_equal '.spec.config'\
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
 }
 
 @test "Control Plane NetworkAttachmentDefinition: Config can be set for interfaces" {
     template --set-json 'interfaces=[{"type": "multus", "config": {"foo": "bar"}}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
 }
 
 @test "Control Plane NetworkAttachmentDefinition: No interfaces" {
