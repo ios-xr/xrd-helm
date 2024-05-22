@@ -39,7 +39,7 @@
       "additionalProperties": false
     },
     "targetPlatforms": {
-      "description": "List of platforms to run the host-check on",
+      "description": "List of platforms to run the host-check application on",
       "type": "array",
       "items": {
         "type": "string",

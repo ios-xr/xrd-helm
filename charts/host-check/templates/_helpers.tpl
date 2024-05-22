@@ -38,14 +38,14 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 
 {{/*
 Runtime arguments. If both xrd-control-plane and xrd-vrouter are specified,
-the argument is not set.
+no arguments are set.
 */}}
 {{- define "hostCheck.args" -}}
-{{- $arg := "" }}
+{{- $args := "" }}
 {{- if and (has "xrd-control-plane" .Values.targetPlatforms) (has "xrd-vrouter" .Values.targetPlatforms) }}
-  {{- $arg = "" }}
+  {{- $args = "" }}
 {{- else }}
-  {{- $arg = printf "-p, %s" (.Values.targetPlatforms | first) }}
+  {{- $args = printf "-p, %s" (.Values.targetPlatforms | first) }}
 {{- end }}
-{{- $arg }}
+{{- $args }}
 {{- end }}

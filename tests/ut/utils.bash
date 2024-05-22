@@ -34,6 +34,12 @@ template () {
     echo "$output" | kubeconform -strict -schema-location default -schema-location 'https://raw.githubusercontent.com/datreeio/CRDs-catalog/v0.0.12/{{.Group}}/{{.ResourceKind}}_{{.ResourceAPIVersion}}.json'
 }
 
+template_hc () {
+    template \
+        --set 'targetPlatforms[0]=xrd-vrouter' \
+        "$@"
+}
+
 template_failure () {
     template_failure_no_set \
         --set image.repository=local \
