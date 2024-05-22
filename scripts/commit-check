@@ -28,6 +28,7 @@ python3 -m venv "$TMP_VENV"
 "$TMP_VENV"/bin/pip install --upgrade pip
 "$TMP_VENV"/bin/pip install PyYAML
 
+echo
 echo "Running version-increment dependency check"
 if ! "$TMP_VENV"/bin/python3 ./scripts/check-dependency-version-increment; then
     echo "Version-increment dependency check failed, check output and fix issues." >&2
