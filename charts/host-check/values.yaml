@@ -3,7 +3,7 @@
 # There are required fields which must be specified for all installations:
 # - image.repository
 # - image.tag
-# - platforms
+# - targetPlatforms
 
 # Image configuration
 image:

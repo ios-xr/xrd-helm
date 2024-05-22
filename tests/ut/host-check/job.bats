@@ -72,6 +72,12 @@ setup_file () {
     assert_error_message_contains "targetPlatforms is required"
 }
 
+@test "host-check: platforms must be xrd-vrouter or xrd-control-plane" {
+    template_failure_no_set --set 'image.repository=local' \
+        --set 'image.tag=latest' --set 'targetPlatforms[0]=foo'
+    assert_error_message_contains "targetPlatforms must be xrd-control-plane and/or xrd-vrouter"
+}
+
 @test "host-check Job: container image is set" {
     template_hc
     assert_query_equal '.spec.template.spec.containers[0].image' "local:latest"
@@ -88,7 +94,7 @@ setup_file () {
 }
 
 @test "host-check Job: illegal container imagePullPolicy are rejected" {
-    template_failure --set 'image.pullPolicy=foo' --set 'targetPlatforms[0]=xrd-vrouter'
+    template_failure_hc --set 'image.pullPolicy=foo'
     assert_error_message_contains \
         "image.pullPolicy must be one of the following: \"Always\", \"IfNotPresent\", \"Never\""
 }

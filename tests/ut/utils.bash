@@ -47,6 +47,12 @@ template_failure () {
         "$@"
 }
 
+template_failure_hc () {
+    template_failure \
+        --set 'targetPlatforms[0]=xrd-vrouter' \
+        "$@"
+}
+
 template_failure_no_set () {
     echo -n "# Run 'helm template'"
     [ "$#" -eq 0 ] && echo "" || echo " with arguments: $*"
