@@ -30,7 +30,7 @@ python3 -m venv "$TMP_VENV"
 
 echo
 echo "Running version-increment dependency check"
-if ! ./scripts/check-dependency-version-increment; then
+if ! "$TMP_VENV"/bin/python3 ./scripts/check-dependency-version-increment; then
     echo "Version-increment dependency check failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
 else
