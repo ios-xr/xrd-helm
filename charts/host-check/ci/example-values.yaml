@@ -1,0 +1,7 @@
+image:
+  repository: required
+  tag: latest
+
+targetPlatforms:
+- xrd-vrouter
+- xrd-control-plane

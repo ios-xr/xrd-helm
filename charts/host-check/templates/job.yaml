@@ -1,0 +1,51 @@
+{{- /* Generate the Job for host-check. */ -}}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hostCheck.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "hostCheck.labels" . | nindent 4 }}
+spec:
+  template:
+    metadata:
+      labels:
+        {{- include "hostCheck.labels" . | nindent 8 }}
+    spec:
+      hostNetwork: true
+      volumes:
+      - name: modules
+        hostPath:
+          path: /lib/modules
+          type: DirectoryOrCreate
+      securityContext:
+        fsGroup: 2000
+      containers:
+      {{- $repo := required "Image repository must be specified" .Values.image.repository }}
+      {{- $tag := required "Image tag must be specified" .Values.image.tag }}
+      - image: {{ printf "\"%s:%s\"" $repo $tag }}
+        name: main
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        volumeMounts:
+        - name: modules
+          mountPath: /lib/modules
+          readOnly: true
+        args: [{{ include "hostCheck.args" . }}]
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          runAsNonRoot: true
+          runAsUser: 1000
+      {{- with .Values.image.pullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 6 }}
+      {{- end }}
+      restartPolicy: Never
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+  backoffLimit: 0

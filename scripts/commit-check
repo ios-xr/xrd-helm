@@ -67,6 +67,15 @@ fi
 podman build tests/ -t helm-tests --network host
 
 echo
+echo "Running host-check unit tests..."
+if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/host-check; then
+    echo "host-check unit tests failed, check output and fix issues." >&2
+    FAILURES=$((FAILURES+1))
+else
+    echo "host-check unit tests passed."
+fi
+
+echo
 echo "Running Control Plane unit tests..."
 if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
     echo "Control Plane unit tests failed, check output and fix issues." >&2

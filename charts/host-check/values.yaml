@@ -1,0 +1,31 @@
+# Default values for host-check.
+#
+# There are required fields which must be specified for all installations:
+# - image.repository
+# - image.tag
+# - targetPlatforms
+
+# Image configuration
+image:
+  # Repository for the container image (required).
+  #repository: ""
+  # Image tag (required).
+  #tag: ""
+  # Pull policy for images.
+  # One of "IfNotPresent", "Always", or "Never"
+  # See https://kubernetes.io/docs/concepts/containers/images/#image-pull-policy
+  pullPolicy: Always
+  # Image pull secrets.
+  # See https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+  pullSecrets: []
+
+# Host-check configuration
+# List of target platforms to run host-check for (required).
+# Valid options are xrd-vrouter and xrd-control-plane.
+#targetPlatforms: []
+
+# Location control for the host-check Pod.
+# Standard K8s configuration, more information available at:
+# https://kubernetes.io/docs/concepts/scheduling-eviction/assign-pod-node/
+# Node labels for pod assignment.
+nodeSelector: {}
