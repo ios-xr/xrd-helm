@@ -1,5 +1,20 @@
 apiVersion: v1
 entries:
+  host-check:
+  - apiVersion: v2
+    created: "2024-05-30T10:05:10.540762536Z"
+    description: Cisco XRd host-check application
+    digest: 155365871c865efa11c1ea75da686c6116002abde752d0f7d66c1052738641f7
+    keywords:
+    - cisco
+    - xrd
+    name: host-check
+    sources:
+    - https://github.com/ios-xr/xrd-helm
+    type: application
+    urls:
+    - https://github.com/ios-xr/xrd-helm/releases/download/host-check-1.0.0/host-check-1.0.0.tgz
+    version: 1.0.0
   xrd-common:
   - apiVersion: v2
     created: "2024-03-28T12:27:45.803189303Z"
@@ -374,4 +389,4 @@ entries:
     urls:
     - https://github.com/ios-xr/xrd-helm/releases/download/xrd-vrouter-1.0.0-beta.1/xrd-vrouter-1.0.0-beta.1.tgz
     version: 1.0.0-beta.1
-generated: "2024-03-28T12:27:46.027380084Z"
+generated: "2024-05-30T10:05:10.540820395Z"
