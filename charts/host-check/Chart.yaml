@@ -1,0 +1,10 @@
+apiVersion: v2
+name: host-check
+description: Cisco XRd host-check application
+type: application
+keywords:
+- cisco
+- xrd
+sources:
+- https://github.com/ios-xr/xrd-helm
+version: 1.0.0

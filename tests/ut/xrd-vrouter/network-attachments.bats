@@ -1,6 +1,6 @@
 #!/usr/bin/env bats
 
-load "../utils.bash"
+load "./utils.bash"
 
 export TEMPLATE_UNDER_TEST="templates/network-attachments.yaml"
 
