@@ -55,14 +55,32 @@ Construct the resources including the default if that resource wasn't specified.
 
 {{- /* Generate CPU env vars */}}
 {{- if .Values.cpu }}
-  {{- with .Values.cpu.cpuset }}
-    {{- $_ := set $env "XR_VROUTER_CPUSET" . }}
-  {{- end }}
-  {{- with .Values.cpu.controlPlaneCpuCount }}
-    {{- $_ := set $env "XR_VROUTER_CP_NUM_CPUS" . }}
-  {{- end }}
-  {{- with .Values.cpu.hyperThreadingMode }}
-    {{- $_ := set $env "XR_VROUTER_HT_MODE" . }}
+  {{- with .Values.cpu}}
+    {{- if and .controlPlaneCpuset (not .dataPlaneCpuset)}}
+      {{- fail "controlPlaneCpuset is set but dataPlaneCpuset is not set" }}
+    {{- end }}
+    {{- if and .dataPlaneCpuset (not .controlPlaneCpuset)}}
+      {{- fail "dataPlaneCpuset is set but controlPlaneCpuset is not set" }}
+    {{- end }}
+    {{- if and .controlPlaneCpuset .dataPlaneCpuset}}
+      {{- if .cpuset }}
+        {{- fail "cpuset is set but controlPlaneCpuset and dataPlaneCpuset are also set" }}
+      {{- end }}
+      {{- if .controlPlaneCpuCount }}
+        {{- fail "controlPlaneCpuCount is set but controlPlaneCpuset and dataPlaneCpuset are also set" }}
+      {{- end }}
+      {{- $_ := set $env "XR_VROUTER_DP_CPUSET" .dataPlaneCpuset }}
+      {{- $_ := set $env "XR_VROUTER_CP_CPUSET" .controlPlaneCpuset }}
+    {{- end }}
+    {{- if .cpuset }}
+      {{- $_ := set $env "XR_VROUTER_CPUSET" .cpuset }}
+    {{- end }}
+    {{- if .controlPlaneCpuCount }}
+      {{- $_ := set $env "XR_VROUTER_CP_NUM_CPUS" .controlPlaneCpuCount }}a
+    {{- end }}
+    {{- if .hyperThreadingMode }}
+      {{- $_ := set $env "XR_VROUTER_HT_MODE" .hyperThreadingMode }}
+    {{- end }}
   {{- end }}
 {{- end }}
 
