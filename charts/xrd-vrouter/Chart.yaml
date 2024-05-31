@@ -8,7 +8,7 @@ keywords:
  - xrd
 sources:
  - https://github.com/ios-xr/xrd-helm
-version: 1.0.3
+version: 1.0.4
 dependencies:
 - name: xrd-common
   version: 1.0.3
