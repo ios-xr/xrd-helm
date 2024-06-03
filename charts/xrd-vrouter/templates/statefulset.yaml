@@ -57,17 +57,17 @@ Construct the resources including the default if that resource wasn't specified.
 {{- if .Values.cpu }}
   {{- with .Values.cpu}}
     {{- if and .controlPlaneCpuset (not .dataPlaneCpuset)}}
-      {{- fail "controlPlaneCpuset is set but dataPlaneCpuset is not set" }}
+      {{- fail "dataPlaneCpuset must be set if controlPlaneCpuset is set" }}
     {{- end }}
     {{- if and .dataPlaneCpuset (not .controlPlaneCpuset)}}
-      {{- fail "dataPlaneCpuset is set but controlPlaneCpuset is not set" }}
+      {{- fail "controlPlaneCpuset must be set if dataPlaneCpuset is set" }}
     {{- end }}
     {{- if and .controlPlaneCpuset .dataPlaneCpuset}}
       {{- if .cpuset }}
-        {{- fail "cpuset is set but controlPlaneCpuset and dataPlaneCpuset are also set" }}
+        {{- fail "cpuset must not be set if controlPlaneCpuset and dataPlaneCpuset are set" }}
       {{- end }}
       {{- if .controlPlaneCpuCount }}
-        {{- fail "controlPlaneCpuCount is set but controlPlaneCpuset and dataPlaneCpuset are also set" }}
+        {{- fail "controlPlaneCpuCount must not be set if controlPlaneCpuset and dataPlaneCpuset are set" }}
       {{- end }}
       {{- $_ := set $env "XR_VROUTER_DP_CPUSET" .dataPlaneCpuset }}
       {{- $_ := set $env "XR_VROUTER_CP_CPUSET" .controlPlaneCpuset }}

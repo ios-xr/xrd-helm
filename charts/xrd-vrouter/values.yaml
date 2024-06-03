@@ -236,12 +236,12 @@ mgmtInterfaces: []
 #    - "10.0.0.1/24"
 
 # CPU settings.
-# More information about the CPU behavior of XRd vRouter can be found
-# here: @@@
 cpu: {}
-  # Specify the cpusets for XRd to use for the control plane and the data
-  # plane. They must each be a subset of the CPUs available for XRd to run on.
+  # Specify the cpusets for XRd to use for the control-plane and the dataplane.
+  # They must each be a subset of the CPUs available for XRd to run on.
   # Both or neither must be specified.
+  # If neither is specified then all available CPUs are used, split
+  # appropriately between the control-plane and dataplane.
   #controlPlaneCpuset: ""
   #dataPlaneCpuset: ""
   # HyperThreading mode.
@@ -259,11 +259,14 @@ cpu: {}
   # Deprecated cpu settings:
   #
   # Override the cpuset to use for XRd. Must not be used in conjunction with
-  # controlPlaneCpuset and dataPlaneCpuset. (Deprecated.)
+  # controlPlaneCpuset and dataPlaneCpuset.
+  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
   # This must be a subset of the CPUs available for XRd to run on.
   #cpuset: ""
   # Override the number of CPUs used for control-plane threads from the pool of
-  # CPUs in the XRd cpuset, used in conjunction with cpuset. (Deprecated.)
+  # CPUs in the XRd cpuset. Must not be used in conjunction with
+  # controlPlaneCpuset and dataPlaneCpuset.
+  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
   #controlPlaneCpuCount: 2
 
 # PCI interface driver.

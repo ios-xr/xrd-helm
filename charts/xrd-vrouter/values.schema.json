@@ -334,11 +334,11 @@
       "type": "object",
       "properties": {
         "controlPlaneCpuset": {
-          "description": "CPUset for the XRd control plane to use",
+          "description": "cpuset for the XRd control-plane to use",
           "type": "string"
         },
         "dataPlaneCpuset": {
-          "description": "CPUset for the XRd data plane to use",
+          "description": "cpuset for the XRd dataplane to use",
           "type": "string"
         },
         "cpuset": {
