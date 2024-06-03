@@ -342,26 +342,26 @@ setup_file () {
 
 @test "vRouter StatefulSet: dataPlaneCpuset must be set if controlPlaneCpuset is" {
     template_failure --set 'cpu.controlPlaneCpuset=bar'
-    assert_error_message_contains "controlPlaneCpuset is set but dataPlaneCpuset is not set"
+    assert_error_message_contains "dataPlaneCpuset must be set if controlPlaneCpuset is set"
 }
 
 @test "vRouter StatefulSet: controlPlaneCpuset must be set if dataPlaneCpuset is" {
     template_failure --set 'cpu.dataPlaneCpuset=bar'
-    assert_error_message_contains "dataPlaneCpuset is set but controlPlaneCpuset is not set"
+    assert_error_message_contains "controlPlaneCpuset must be set if dataPlaneCpuset is set"
 }
 
 @test "vRouter StatefulSet: cpuset can't be specified if controlPlaneCpuset and dataPlaneCpuset are" {
     template_failure --set 'cpu.cpuset=foo' \
         --set 'cpu.controlPlaneCpuset=bar' \
         --set 'cpu.dataPlaneCpuset=baz'
-    assert_error_message_contains "cpuset is set but controlPlaneCpuset and dataPlaneCpuset are also set"
+    assert_error_message_contains "cpuset must not be set if controlPlaneCpuset and dataPlaneCpuset are set"
 }
 
 @test "vRouter StatefulSet: controlPlaneCpuCount can't be specified if controlPlaneCpuset and dataPlaneCpuset are" {
     template_failure --set 'cpu.controlPlaneCpuCount=1' \
         --set 'cpu.controlPlaneCpuset=foo'\
         --set 'cpu.dataPlaneCpuset=bar'
-    assert_error_message_contains "controlPlaneCpuCount is set but controlPlaneCpuset and dataPlaneCpuset are also set"
+    assert_error_message_contains "controlPlaneCpuCount must not be set if controlPlaneCpuset and dataPlaneCpuset are set"
 }
 
 @test "vRouter StatefulSet: hyperthreading mode container env var can be set" {
