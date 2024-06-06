@@ -244,6 +244,19 @@ cpu: {}
   # appropriately between the control-plane and dataplane.
   #controlPlaneCpuset: ""
   #dataPlaneCpuset: ""
+  #
+  # Deprecated cpu settings:
+  #
+  # Override the cpuset to use for XRd. Must not be used in conjunction with
+  # controlPlaneCpuset and dataPlaneCpuset.
+  # This must be a subset of the CPUs available for XRd to run on.
+  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
+  #cpuset: ""
+  # Override the number of CPUs used for control-plane threads from the pool of
+  # CPUs in the XRd cpuset. Must not be used in conjunction with
+  # controlPlaneCpuset and dataPlaneCpuset.
+  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
+  #controlPlaneCpuCount: 2
   # HyperThreading mode.
   # This option must be used when the CPU has hyperthreading turned on
   # in order to ensure the dataplane has whole physical CPU cores and prevent
@@ -254,20 +267,10 @@ cpu: {}
   #               * physical core 0 has logical cores 0 and 1
   #               * physical core 1 has logical cores 2 and 3
   #               * etc...
+  # Must not be used in conjunction with controlPlaneCpuset and
+  # dataPlaneCpuset.
+  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
   #hyperThreadingMode: "off"
-  #
-  # Deprecated cpu settings:
-  #
-  # Override the cpuset to use for XRd. Must not be used in conjunction with
-  # controlPlaneCpuset and dataPlaneCpuset.
-  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
-  # This must be a subset of the CPUs available for XRd to run on.
-  #cpuset: ""
-  # Override the number of CPUs used for control-plane threads from the pool of
-  # CPUs in the XRd cpuset. Must not be used in conjunction with
-  # controlPlaneCpuset and dataPlaneCpuset.
-  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
-  #controlPlaneCpuCount: 2
 
 # PCI interface driver.
 # Two PCI drivers are supported:

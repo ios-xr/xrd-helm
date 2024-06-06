@@ -364,6 +364,13 @@ setup_file () {
     assert_error_message_contains "controlPlaneCpuCount must not be set if controlPlaneCpuset and dataPlaneCpuset are set"
 }
 
+@test "vRouter StatefulSet: hyperThreadingMode can't be specified if controlPlaneCpuset and dataPlaneCpuset are" {
+    template_failure --set 'cpu.hyperThreadingMode=off' \
+        --set 'cpu.controlPlaneCpuset=foo'\
+        --set 'cpu.dataPlaneCpuset=bar'
+    assert_error_message_contains "hyperThreadingMode must not be set if controlPlaneCpuset and dataPlaneCpuset are set"
+}
+
 @test "vRouter StatefulSet: hyperthreading mode container env var can be set" {
     template --set 'cpu.hyperThreadingMode=off'
     assert_query_equal '.spec.template.spec.containers[0].env[4].name' "XR_VROUTER_HT_MODE"
