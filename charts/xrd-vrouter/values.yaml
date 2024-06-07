@@ -244,6 +244,19 @@ cpu: {}
   # appropriately between the control-plane and dataplane.
   #controlPlaneCpuset: ""
   #dataPlaneCpuset: ""
+  # HyperThreading mode.
+  # This option can be used when the CPU has hyperthreading turned on to ensure
+  # that the dataplane has whole physical CPU cores and to prevent 'noisy
+  # neighbor' issues.
+  # This mode supports two values:
+  #  - 'off' - no hyperthreading (default)
+  #  - 'pairs' - where hyperthreaded siblings are consecutive, i.e.
+  #               * physical core 0 has logical cores 0 and 1
+  #               * physical core 1 has logical cores 2 and 3
+  #               * etc...
+  # Must not be used in conjunction with controlPlaneCpuset and
+  # dataPlaneCpuset.
+  #hyperThreadingMode: "off"
   #
   # Deprecated cpu settings:
   #
@@ -257,20 +270,6 @@ cpu: {}
   # controlPlaneCpuset and dataPlaneCpuset.
   # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
   #controlPlaneCpuCount: 2
-  # HyperThreading mode.
-  # This option must be used when the CPU has hyperthreading turned on
-  # in order to ensure the dataplane has whole physical CPU cores and prevent
-  # 'noisy neighbor' issues.
-  # This mode supports two values:
-  #  - 'off' - no hyperthreading (default)
-  #  - 'pairs' - where hyperthreaded siblings are consecutive, i.e.
-  #               * physical core 0 has logical cores 0 and 1
-  #               * physical core 1 has logical cores 2 and 3
-  #               * etc...
-  # Must not be used in conjunction with controlPlaneCpuset and
-  # dataPlaneCpuset.
-  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
-  #hyperThreadingMode: "off"
 
 # PCI interface driver.
 # Two PCI drivers are supported:
