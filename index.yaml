@@ -257,6 +257,25 @@ entries:
     version: 1.0.0-beta.1
   xrd-vrouter:
   - apiVersion: v2
+    created: "2024-06-12T09:11:53.221030815Z"
+    dependencies:
+    - name: xrd-common
+      repository: file://../xrd-common
+      version: 1.0.3
+    description: Cisco IOS-XR XRd vRouter platform
+    digest: 26943247e9f2a1d5c34413d8165c42d9fecbf0d84882f5a921b7c3eb1c56d5fc
+    keywords:
+    - cisco
+    - ios-xr
+    - xrd
+    name: xrd-vrouter
+    sources:
+    - https://github.com/ios-xr/xrd-helm
+    type: application
+    urls:
+    - https://github.com/ios-xr/xrd-helm/releases/download/xrd-vrouter-1.0.4/xrd-vrouter-1.0.4.tgz
+    version: 1.0.4
+  - apiVersion: v2
     created: "2024-03-28T12:27:46.02728107Z"
     dependencies:
     - name: xrd-common
@@ -389,4 +408,4 @@ entries:
     urls:
     - https://github.com/ios-xr/xrd-helm/releases/download/xrd-vrouter-1.0.0-beta.1/xrd-vrouter-1.0.0-beta.1.tgz
     version: 1.0.0-beta.1
-generated: "2024-05-30T10:05:10.540820395Z"
+generated: "2024-06-12T09:11:53.221109442Z"
