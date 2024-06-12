@@ -20,5 +20,5 @@ The unit tests can be run using any container manager.  For example, using Docke
 
 ```
 docker build . -t helm-tests
-docker run -v "$PWD/../:/charts" helm-tests bats tests/ut/xrd-[control-plane or vrouter]
+docker run -v "$PWD/../:/charts" helm-tests bats tests/ut/[host-check, xrd-control-plane or xrd-vrouter]
 ```
