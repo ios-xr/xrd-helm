@@ -342,6 +342,14 @@
       "description": "CPU settings",
       "type": "object",
       "properties": {
+        "controlPlaneCpuset": {
+          "description": "cpuset for the XRd control-plane to use",
+          "type": "string"
+        },
+        "dataPlaneCpuset": {
+          "description": "cpuset for the XRd dataplane to use",
+          "type": "string"
+        },
         "cpuset": {
           "description": "Override the full cpuset XRd runs on",
           "type": "string"

@@ -253,26 +253,40 @@ mgmtInterfaces: []
 #    - "10.0.0.1/24"
 
 # CPU settings.
-# More information about the CPU behavior of XRd vRouter can be found
-# here: @@@
 cpu: {}
-  # Override the cpuset to use for XRd.
-  # This must be a subset of the CPUs available for XRd to run on.
-  #cpuset: ""
-  # Override the number of CPUs used for control-plane threads from
-  # the pool of CPUs in the XRd cpuset.
-  #controlPlaneCpuCount: 2
+  # Specify the cpusets for XRd to use for the control-plane and the dataplane.
+  # They must each be a subset of the CPUs available for XRd to run on.
+  # Both or neither must be specified.
+  # If neither is specified then all available CPUs are used, split
+  # appropriately between the control-plane and dataplane.
+  #controlPlaneCpuset: ""
+  #dataPlaneCpuset: ""
   # HyperThreading mode.
-  # This option must be used when the CPU has hyperthreading turned on
-  # in order to ensure the dataplane has whole physical CPU cores and prevent
-  # 'noisy neighbor' issues.
+  # This option can be used when the CPU has hyperthreading turned on to ensure
+  # that the dataplane has whole physical CPU cores and to prevent 'noisy
+  # neighbor' issues.
   # This mode supports two values:
   #  - 'off' - no hyperthreading (default)
   #  - 'pairs' - where hyperthreaded siblings are consecutive, i.e.
   #               * physical core 0 has logical cores 0 and 1
   #               * physical core 1 has logical cores 2 and 3
   #               * etc...
+  # Must not be used in conjunction with controlPlaneCpuset and
+  # dataPlaneCpuset.
   #hyperThreadingMode: "off"
+  #
+  # Deprecated cpu settings:
+  #
+  # Override the cpuset to use for XRd. Must not be used in conjunction with
+  # controlPlaneCpuset and dataPlaneCpuset.
+  # This must be a subset of the CPUs available for XRd to run on.
+  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
+  #cpuset: ""
+  # Override the number of CPUs used for control-plane threads from the pool of
+  # CPUs in the XRd cpuset. Must not be used in conjunction with
+  # controlPlaneCpuset and dataPlaneCpuset.
+  # Deprecated. Use controlPlaneCpuset and dataPlaneCpuset instead.
+  #controlPlaneCpuCount: 2
 
 # PCI interface driver.
 # Two PCI drivers are supported:
