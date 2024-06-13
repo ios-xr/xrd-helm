@@ -350,11 +350,21 @@ setup_file () {
     assert_error_message_contains "controlPlaneCpuset must be set if dataPlaneCpuset is set"
 }
 
+@test "vRouter StatefulSet: cpuset can be set" {
+    template --set 'cpu.cpuset=foo'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_VROUTER_CPUSET"))][0][0].value' "foo"
+}
+
 @test "vRouter StatefulSet: cpuset can't be specified if controlPlaneCpuset and dataPlaneCpuset are" {
     template_failure --set 'cpu.cpuset=foo' \
         --set 'cpu.controlPlaneCpuset=bar' \
         --set 'cpu.dataPlaneCpuset=baz'
     assert_error_message_contains "cpuset must not be set if controlPlaneCpuset and dataPlaneCpuset are set"
+}
+
+@test "vRouter StatefulSet: controlPlaneCpuCount can be set" {
+    template --set 'cpu.controlPlaneCpuCount=1'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_VROUTER_CP_NUM_CPUS"))][0][0].value' "1"
 }
 
 @test "vRouter StatefulSet: controlPlaneCpuCount can't be specified if controlPlaneCpuset and dataPlaneCpuset are" {

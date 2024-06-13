@@ -79,7 +79,7 @@ Construct the resources including the default if that resource wasn't specified.
       {{- $_ := set $env "XR_VROUTER_CPUSET" .cpuset }}
     {{- end }}
     {{- if .controlPlaneCpuCount }}
-      {{- $_ := set $env "XR_VROUTER_CP_NUM_CPUS" .controlPlaneCpuCount }}a
+      {{- $_ := set $env "XR_VROUTER_CP_NUM_CPUS" .controlPlaneCpuCount }}
     {{- end }}
     {{- if .hyperThreadingMode }}
       {{- $_ := set $env "XR_VROUTER_HT_MODE" .hyperThreadingMode }}
