@@ -56,6 +56,9 @@ spec:
       {{- if .Values.serviceAccountName }}
       serviceAccountName: {{ .Values.serviceAccountName }}
       {{- end }}
+      {{- if .Values.runtimeClassName }}
+      runtimeClassName: {{ .Values.runtimeClassName }}
+      {{- end }}
       {{- if .Values.hostNetwork }}
       hostNetwork: true
       {{- end }}

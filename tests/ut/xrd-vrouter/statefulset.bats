@@ -348,6 +348,11 @@ setup_file () {
     assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_VROUTER_DP_HUGEPAGE_MB"))][0][0].value' "6144"
 }
 
+@test "vRouter StatefulSet: runtimeClassName can be set" {
+    template --set 'runtimeClassName=foo'
+    assert_query_equal '.spec.template.spec.runtimeClassName' "foo"
+}
+
 @test "vRouter StatefulSet: XR_VROUTER_CP_CPUSET and XR_VROUTER_DP_CPUSET can be set" {
     template --set 'cpu.controlPlaneCpuset=foo' --set 'cpu.dataPlaneCpuset=bar'
     assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_VROUTER_CP_CPUSET"))][0][0].value' "foo"

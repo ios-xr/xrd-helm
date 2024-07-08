@@ -338,6 +338,10 @@
         "additionalProperties": false
       }
     },
+    "runtimeClassName": {
+      "description": "Runtime Class name for the XRd pod",
+      "type": "string"
+    },
     "cpu": {
       "description": "CPU settings",
       "type": "object",
