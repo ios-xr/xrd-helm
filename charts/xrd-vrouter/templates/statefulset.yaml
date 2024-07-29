@@ -69,9 +69,6 @@ Construct the resources including the default if that resource wasn't specified.
       {{- if .controlPlaneCpuCount }}
         {{- fail "controlPlaneCpuCount must not be set if controlPlaneCpuset and dataPlaneCpuset are set" }}
       {{- end }}
-       {{- if .hyperThreadingMode }}
-        {{- fail "hyperThreadingMode must not be set if controlPlaneCpuset and dataPlaneCpuset are set" }}
-      {{- end }}
       {{- $_ := set $env "XR_VROUTER_DP_CPUSET" .dataPlaneCpuset }}
       {{- $_ := set $env "XR_VROUTER_CP_CPUSET" .controlPlaneCpuset }}
     {{- end }}

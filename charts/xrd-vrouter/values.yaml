@@ -270,14 +270,13 @@ cpu: {}
   # that the dataplane has whole physical CPU cores and to prevent 'noisy
   # neighbor' issues.
   # This mode supports two values:
-  #  - 'off' - no hyperthreading (default)
+  #  - 'auto' - detect if hyperthreading is enabled from the system (this only
+  #             works on baremetal systems, not ESXi)
   #  - 'pairs' - where hyperthreaded siblings are consecutive, i.e.
   #               * physical core 0 has logical cores 0 and 1
   #               * physical core 1 has logical cores 2 and 3
   #               * etc...
-  # Must not be used in conjunction with controlPlaneCpuset and
-  # dataPlaneCpuset.
-  #hyperThreadingMode: "off"
+  #hyperThreadingMode: "auto"
   #
   # Deprecated cpu settings:
   #

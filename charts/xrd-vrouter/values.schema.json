@@ -366,7 +366,7 @@
           "description": "HyperThreading mode for cpuset allocations",
           "type": "string",
           "enum": [
-            "off",
+            "auto",
             "pairs"
           ],
           "default": "off"
