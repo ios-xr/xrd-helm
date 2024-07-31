@@ -53,6 +53,11 @@ Construct the resources including the default if that resource wasn't specified.
 {{- $hugepageMb := include "xrd.toMiB" $hugepageSize }}
 {{- $_ := set $env "XR_VROUTER_DP_HUGEPAGE_MB" $hugepageMb  }}
 
+{{- /* Generate PROFILE env var */}}
+{{- if .Values.profile }}
+  {{- $_ := set $env "XR_VROUTER_PROFILE" .Values.profile }}
+{{- end }}
+
 {{- /* Generate CPU env vars */}}
 {{- if .Values.cpu }}
   {{- with .Values.cpu}}

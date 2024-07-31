@@ -256,6 +256,14 @@ mgmtInterfaces: []
 # Refer to https://kubernetes.io/docs/concepts/containers/runtime-class/.
 #runtimeClassName: "performance-cisco-ios-xr"
 
+# vRouter profile. Valid options:
+#   - "vpe": for cloud router use cases
+#   - "vrr": for virtual route reflector use cases.
+# The choice of profile determines the way in which XRd uses available CPU
+# cores, so that the usage is suitable for the specified use case. If no option
+# is given, XRd uses the "vpe" profile.
+#profile: "vpe"
+
 # CPU settings.
 cpu: {}
   # Specify the cpusets for XRd to use for the control-plane and the dataplane.

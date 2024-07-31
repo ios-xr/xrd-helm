@@ -338,6 +338,14 @@
         "additionalProperties": false
       }
     },
+    "profile": {
+      "description": "XRd vRouter profile",
+      "type": "string",
+      "enum": [
+        "vpe",
+        "vrr"
+      ]
+    },
     "runtimeClassName": {
       "description": "Runtime Class name for the XRd pod",
       "type": "string"
