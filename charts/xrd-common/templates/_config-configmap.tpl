@@ -18,7 +18,7 @@ data:
     username {{ .Values.config.username }}
      group root-lr
      group cisco-support
-     password {{ .Values.config.password }}
+     secret {{ .Values.config.password }}
     !
     {{- end }}
     {{- if (get .Values.config "ascii") }}
