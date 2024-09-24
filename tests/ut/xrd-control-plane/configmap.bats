@@ -71,7 +71,7 @@ setup_file () {
 @test "Control Plane ConfigMap: Startup config can be set using username and password" {
     template --set 'config.username=foo' --set 'config.password=bar'
     assert_query_equal '.data."startup.cfg"' \
-        "username foo\n group root-lr\n group cisco-support\n password bar\n!"
+        "username foo\n group root-lr\n group cisco-support\n secret bar\n!"
 }
 
 @test "Control Plane ConfigMap: password must be set if username is" {
