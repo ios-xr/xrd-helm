@@ -15,7 +15,19 @@ or an empty string otherwise.
 
 {{- define "xrd.interfaces.anySRIOV" -}}
 {{- /*
-Returns a string equivalent to boolean true if there are any sriov network interfaces,
+Returns a string equivalent to boolean true if there are any sriov interfaces,
+or an empty string otherwise.
+*/ -}}
+{{- range (concat .Values.interfaces .Values.mgmtInterfaces) }}
+  {{- if eq .type "sriov" }}
+1
+  {{- end }}
+{{- end }}
+{{- end -}}
+
+{{- define "xrd.interfaces.anySRIOVData" -}}
+{{- /*
+Returns a string equivalent to boolean true if there are any sriov data interfaces,
 or an empty string otherwise.
 */ -}}
 {{- range .Values.interfaces }}
@@ -54,7 +66,7 @@ or an empty string otherwise.
 
 {{- define "xrd.interfaces.linuxflags" -}}
 {{- $flags := list }}
-{{- $base := list "type" "config" "attachmentConfig" }}
+{{- $base := list "type" "config" "attachmentConfig" "resource" }}
 {{- range $k, $v := . -}}
   {{- if eq $k "snoopIpv4Address" }}
     {{- if $v }}
@@ -82,7 +94,7 @@ or an empty string otherwise.
     {{- end }}
     {{- $flags = append $flags (printf "xr_name=%s" $v) }}
   {{- else if not (has $k $base) }}
-    {{- fail (printf "%s may not be specified for defaultCni or multus interfaces" $k) }}
+    {{- fail (printf "%s may not be specified for defaultCni, multus or sriov interfaces" $k) }}
   {{- end }}
 {{- end }}
 {{- join "," $flags }}

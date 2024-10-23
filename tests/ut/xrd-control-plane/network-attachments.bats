@@ -104,25 +104,100 @@ setup_file () {
 
 @test "Control Plane NetworkAttachmentDefinition: error if unknown interface type is requested" {
     template_failure --set-json 'interfaces=[{"type": "foo"}]'
-    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""
+    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\", \"sriov\""
 }
 
 @test "Control Plane NetworkAttachmentDefinition: error if PCI interface type is requested" {
     template_failure --set-json 'interfaces=[{"type": "pci"}]'
-    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""
-}
-
-@test "Control Plane NetworkAttachmentDefinition: error if sriov interface type is requested" {
-    template_failure --set-json 'interfaces=[{"type": "sriov"}]'
-    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""
+    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\", \"sriov\""
 }
 
 @test "Control Plane NetworkAttachmentDefinition: error if unknown mgmt interface type is requested" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "foo"}]'
-    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""
+    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\", \"sriov\""
 }
 
 @test "Control Plane NetworkAttachmentDefinition: error if PCI mgmt interface type is requested" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "pci"}]'
-    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""
+    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\", \"sriov\""
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Name consists of the release name, template name and index" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
+    assert_query_equal '.metadata.name' "release-name-xrd-control-plane-0"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Name can be overridden with fullnameOverride" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
+        --set 'fullnameOverride=xrd-test'
+    assert_query_equal '.metadata.name' "xrd-test-0"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Name can be overridden with nameOverride" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
+        --set 'nameOverride=xrd-test'
+    assert_query_equal '.metadata.name' "release-name-xrd-test-0"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Namespace is default" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
+    assert_query_equal '.metadata.namespace' "default"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Default annotations are set" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
+    assert_query_equal '.metadata.annotations."k8s.v1.cni.cncf.io/resourceName"' "foo"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Global annotations and commonAnnotations can be added and are correctly merged" {
+    template \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
+        --set 'global.annotations.foo=bar' \
+        --set 'commonAnnotations.baz=baa'
+    assert_query_equal '.metadata.annotations."k8s.v1.cni.cncf.io/resourceName"' "foo"
+    assert_query_equal '.metadata.annotations.foo' "bar"
+    assert_query_equal '.metadata.annotations.baz' "baa"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Recommended labels are set" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
+    assert_query_equal '.metadata.labels."app.kubernetes.io/name"' "xrd-control-plane"
+    assert_query_equal '.metadata.labels."app.kubernetes.io/instance"' "release-name"
+    assert_query_equal '.metadata.labels."app.kubernetes.io/managed-by"' "Helm"
+    assert_query '.metadata.labels | has("app.kubernetes.io/version")'
+    assert_query '.metadata.labels | has("helm.sh/chart")'
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Global labels and commonLabels can be added and are correctly merged" {
+    template \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
+        --set 'global.labels.foo=bar' \
+        --set 'commonLabels.baz=baa'
+    assert_query_equal '.metadata.labels.foo' "bar"
+    assert_query_equal '.metadata.labels.baz' "baa"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Config can be set" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\": [\n    {\n      \"type\": \"sriov\"\n    }\n  ]\n}"
+}
+
+@test "Control Plane NetworkAttachmentDefinition: multiple sriov interfaces can be created together" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}},{"type": "sriov", "resource": "bar", "config": {"type": "sriov"}}]'
+    assert_query_equal '.metadata.name' \
+        "release-name-xrd-control-plane-0\n---\nrelease-name-xrd-control-plane-1"
+}
+
+@test "Control Plane NetworkAttachmentDefinition: sriov interfaces and multus mgmt interfaces can be created together" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]' \
+        --set-json 'mgmtInterfaces=[{"type": "multus"}]'
+    assert_query_equal '.metadata.name' \
+        "release-name-xrd-control-plane-0\n---\nrelease-name-xrd-control-plane-1"
+}
+
+@test "Control Plane NetworkAttachmentDefinition: sriov mgmt interface can be created" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
+    assert_query_equal '.metadata.name' \
+        "release-name-xrd-control-plane-0"
 }

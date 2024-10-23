@@ -203,13 +203,12 @@ config:
 #                The network attachment definition configuration must be
 #                specified under the 'config' field for the interface. Config
 #                is required to specify and configure the CNI used.
-#                This can be specified as a line interface only.
 #
-# On 'defaultCni' and 'multus' interfaces, the following options may also
-# be specified to control the interface behavior in XR:
+# On 'defaultCni' and 'multus' interfaces, and 'sriov' interfaces when used as
+# a management interface, the following options may also be specified to
+# control the interface behavior in XR:
 #   - chksum: Turn on TCP/UDP checksum calculation for ingress packets (to
 #             counteract checksum offload to hardware).
-#   - xrName: Customize the XR interface name for this interface.
 #   - snoopIpv4Address: see below.
 #   - snoopIpv4DefaultRoute: see below.
 #   - snoopIpv6Address: see below.
@@ -229,7 +228,7 @@ interfaces: []
 #  config:
 #    last: 3
 #- type: sriov
-#  resource: intel.com/intel_sriov_netdevice
+#  resource: intel.com/intel_sriov_netdevice_1
 #  config:
 #    type: sriov
 #    vlan: 1
@@ -251,6 +250,11 @@ mgmtInterfaces: []
 #  attachmentConfig:
 #    ips:
 #    - "10.0.0.1/24"
+#- type: sriov
+#  resource: intel.com/intel_sriov_netdevice_2
+#  config:
+#    type: sriov
+#  snoopIpv4Address: true
 
 # Add a runtimeClassName to the XRd Pod.
 # Refer to https://kubernetes.io/docs/concepts/containers/runtime-class/.

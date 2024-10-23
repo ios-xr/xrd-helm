@@ -113,6 +113,12 @@ setup_file () {
         "[\n  {\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
 }
 
+@test "vRouter StatefulSet: .spec.template annotations are added for sriov mgmt interfaces" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
+        "[\n  {\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
+}
+
 @test "vRouter StatefulSet: .spec.template podAnnotations can be set" {
     template --set 'podAnnotations.foo=bar'
     assert_query_equal '.spec.template.metadata.annotations.foo' "bar"
@@ -250,6 +256,10 @@ setup_file () {
     assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "network-status-annotation"
 }
 
+@test "vRouter StatefulSet: downwardAPI volume is not set if sriov mgmt network" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query '.spec.template.spec.volumes[0].downwardAPI | not'
+}
 
 @test "vRouter: Image repository must be specified" {
     template_failure_no_set --set 'image.tag=latest'
@@ -435,6 +445,12 @@ setup_file () {
     assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1"
 }
 
+@test "vRouter StatefulSet: XR_MGMT_INTERFACES container env vars is correctly for sriov mgmt interface when sriov interface is present" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo"}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "bar"}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1"
+}
+
 @test "vRouter StatefulSet: set snoopIpv4Address flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv4Address": true}]'
     assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v4"
@@ -457,6 +473,11 @@ setup_file () {
 
 @test "vRouter StatefulSet: set chksum flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "chksum": true}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,chksum"
+}
+
+@test "vRouter StatefulSet: set chksum flag in XR_MGMT_INTERFACES for sriov interface" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo", "chksum": true}]'
     assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,chksum"
 }
 

@@ -258,11 +258,12 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. One of: 'defaultCni' or 'multus'",
+            "description": "Underlying interface type. One of: 'defaultCni', 'multus' or 'sriov'",
             "type": "string",
             "enum": [
               "defaultCni",
-              "multus"
+              "multus",
+              "sriov"
             ]
           },
           "config": {
@@ -272,6 +273,10 @@
           "attachmentConfig": {
             "description": "Network attachment annotation configuration, for multus-type interfaces only",
             "type": "object"
+          },
+          "resource": {
+            "description": "SR-IOV resource-pool name, for sriov-type interfaces only",
+            "type": "string"
           },
           "snoopIpv4Address": {
             "description": "Indicate whether to snoop the pre-existing IPv4 address of the interface into XR config",
@@ -316,11 +321,12 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. One of: 'defaultCni' or 'multus'",
+            "description": "Underlying interface type. One of: 'defaultCni', 'multus' or 'sriov'",
             "type": "string",
             "enum": [
               "defaultCni",
-              "multus"
+              "multus",
+              "sriov"
             ]
           },
           "config": {
@@ -330,6 +336,10 @@
           "attachmentConfig": {
             "description": "Network attachment annotation configuration, for multus-type interfaces only",
             "type": "object"
+          },
+          "resource": {
+            "description": "SR-IOV resource-pool name, for sriov-type interfaces only",
+            "type": "string"
           },
           "snoopIpv4Address": {
             "description": "Indicate whether to snoop the pre-existing IPv4 address of the interface into XR config",

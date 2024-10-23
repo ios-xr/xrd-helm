@@ -85,6 +85,9 @@
 {{- include "xrd.interfaces.checkDefaultCniCount" . -}}
 {{- range .Values.mgmtInterfaces }}
   {{- if eq .type "defaultCni" }}
+    {{- if hasKey . "attachmentConfig" }}
+      {{- fail "attachmentConfig may not be specified for defaultCni mgmt interface types" }}
+    {{- end }}
     {{- if (hasKey . "xrName") }}
       {{- fail "xrName may not be specified for interfaces on XRd vRouter" }}
     {{- end }}
@@ -94,11 +97,21 @@
     {{- else }}
       {{- $interfaces = append $interfaces "linux:eth0" }}
     {{- end }}
-  {{- else if eq .type "multus" }}
+  {{- else if or (eq .type "multus") (eq .type "sriov") }}
     {{- if (hasKey . "xrName") }}
       {{- fail "xrName may not be specified for interfaces on XRd vRouter" }}
     {{- end }}
     {{- $flags := include "xrd.interfaces.linuxflags" . }}
+    {{- if eq .type "sriov" }}
+      {{- if hasKey . "attachmentConfig" }}
+        {{- fail "attachmentConfig may not be specified for sriov mgmt interface types" }}
+      {{- end }}
+      {{- if not (hasKey . "resource") }}
+        {{- fail "Resource must be specified for sriov mgmt interface types" }}
+      {{- end }}
+    {{- else if hasKey . "resource" }}
+      {{- fail "resource may not be specified for multus mgmt interface types" }}
+    {{- end }}
     {{- if $flags }}
       {{- $interfaces = append $interfaces (printf "linux:net%d,%s" $cniIndex $flags) }}
     {{- else }}

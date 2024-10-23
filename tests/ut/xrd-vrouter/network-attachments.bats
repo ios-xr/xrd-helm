@@ -169,12 +169,7 @@ setup_file () {
 
 @test "vRouter NetworkAttachmentDefinition: MGMT interface cannot be type pci" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "pci"}]'
-    assert_error_message_contains "type must be one of the following: \"defaultCni\", \"multus\""
-}
-
-@test "vRouter NetworkAttachmentDefinition: MGMT interface cannot be type sriov" {
-    template_failure --set-json 'mgmtInterfaces=[{"type": "sriov"}]'
-    assert_error_message_contains "type must be one of the following: \"defaultCni\", \"multus\""
+    assert_error_message_contains "type must be one of the following: \"defaultCni\", \"multus\", \"sriov\""
 }
 
 @test "vRouter NetworkAttachmentDefinition: Error if multiple defaultCNI requested" {
@@ -195,5 +190,5 @@ setup_file () {
 
 @test "vRouter NetworkAttachmentDefinition: error if unknown mgmt interface type is requested" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "foo"}]'
-    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\""
+    assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\", \"sriov\""
 }

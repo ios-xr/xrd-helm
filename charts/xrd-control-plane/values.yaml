@@ -180,9 +180,17 @@ config:
 #                specified under the 'config' field for the interface.
 #                Any attachment annotation configuration may be specified under
 #                the 'attachmentConfig' field.
+#  - sriov:      This connects an additional network allocated from an SR-IOV
+#                network resource pool and created using a CNI plugin, driven
+#                by the multus meta-CNI plugin.
+#                An SR-IOV resource pool must be specified under the 'resource'
+#                key for the interface.
+#                The network attachment definition configuration must be
+#                specified under the 'config' field for the interface. Config
+#                is required to specify and configure the CNI used.
 #
-# On 'defaultCni' and 'multus' interfaces, the following options may also
-# be specified to control the interface behavior in XR:
+# On 'defaultCni', 'multus' and 'sriov' interfaces, the following options may
+# also be specified to control the interface behavior in XR:
 #   - chksum: Turn on TCP/UDP checksum calculation for ingress packets (to
 #             counteract checksum offload to hardware).
 #   - xrName: Customize the XR interface name for this interface.
@@ -204,6 +212,11 @@ interfaces: []
 #    type: host-device
 #    device: eth1
 #  xrName: GigabitEthernet0/0/0/3
+#- type: sriov
+#  resource: intel.com/intel_sriov_netdevice_1
+#  config:
+#    type: sriov
+#    vlan: 1
 
 # XRd management interfaces.
 mgmtInterfaces: []
@@ -222,6 +235,10 @@ mgmtInterfaces: []
 #  attachmentConfig:
 #    ips:
 #    - "10.0.0.1/24"
+#- type: sriov
+#  resource: intel.com/intel_sriov_netdevice_2
+#  config:
+#    type: sriov
 
 # XRd advanced settings.
 # This section contains settings not required by most users.
