@@ -80,6 +80,16 @@ setup_file () {
     assert_fields_equal '.spec.serviceName' '.metadata.name'
 }
 
+@test "vRouter StatefulSet: No serviceAccountName by default" {
+    template
+    assert_query '.spec.serviceAccountName | not'
+}
+
+@test "vRouter StatefulSet: serviceAccountName can be set" {
+    template --set 'serviceAccountName=foo'
+    assert_query_equal '.spec.template.spec.serviceAccountName' "foo"
+}
+
 @test "vRouter StatefulSet: Selector labels are set" {
     template
     assert_query_equal '.spec.selector.matchLabels' \
@@ -100,7 +110,13 @@ setup_file () {
 @test "vRouter StatefulSet: .spec.template annotations are added for multus interfaces" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
-        "[\n  {\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
+        "[\n  {\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
+}
+
+@test "vRouter StatefulSet: .spec.template annotations are added for sriov mgmt interfaces" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
+        "[\n  {\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
 }
 
 @test "vRouter StatefulSet: .spec.template podAnnotations can be set" {
@@ -109,9 +125,10 @@ setup_file () {
 }
 
 @test "vRouter StatefulSet: podNetworkAnnotations contain the desired information" {
-    template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]'
+    template --set-json 'mgmtInterfaces=[{"type": "multus", "attachmentConfig": {"foo": "bar"}}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "baz"}]'
     assert_query_equal '.spec.template.metadata.annotations."k8s.v1.cni.cncf.io/networks"' \
-        "[\n  {\n    \"foo\": \"bar\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  }\n]"
+        "[\n  {\n    \"interface\": \"net0\",\n    \"name\": \"release-name-xrd-vrouter-0\"\n  },\n  {\n    \"foo\": \"bar\",\n    \"interface\": \"net1\",\n    \"name\": \"release-name-xrd-vrouter-1\"\n  }\n]"
 }
 
 @test "vRouter StatefulSet: .spec.template recommended labels are set" {
@@ -232,6 +249,18 @@ setup_file () {
     assert_query_equal '.spec.template.spec.volumes[0].name' "foo"
 }
 
+@test "vRouter StatefulSet: downwardAPI volume is set if sriov network" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '.spec.template.spec.volumes[0].name' "network-status-annotation"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].fieldRef.fieldPath' "metadata.annotations['k8s.v1.cni.cncf.io/network-status']"
+    assert_query_equal '.spec.template.spec.volumes[0].downwardAPI.items[0].path' "network-status-annotation"
+}
+
+@test "vRouter StatefulSet: downwardAPI volume is not set if sriov mgmt network" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query '.spec.template.spec.volumes[0].downwardAPI | not'
+}
+
 @test "vRouter: Image repository must be specified" {
     template_failure_no_set --set 'image.tag=latest'
     assert_error_message_contains "image: repository is required"
@@ -310,28 +339,28 @@ setup_file () {
 
 @test "vRouter StatefulSet: container env vars version is set" {
     template
-    assert_query_equal '.spec.template.spec.containers[0].env[0].name' "XR_ENV_VARS_VERSION"
-    assert_query_equal '.spec.template.spec.containers[0].env[0].value' "1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_ENV_VARS_VERSION"))][0][0].value' "1"
 }
 
 @test "vRouter StatefulSet: empty container interface env vars are set by default" {
     template
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' ""
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' ""
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' ""
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' ""
 }
 
 @test "vRouter StatefulSet: default hugepage size container env var is set" {
     template
-    assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_VROUTER_DP_HUGEPAGE_MB"
-    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "3072"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_VROUTER_DP_HUGEPAGE_MB"))][0][0].value' "3072"
 }
 
 @test "vRouter StatefulSet: non-default hugepage size container env var has correct size" {
     template --set 'resources.limits.hugepages-1Gi=6Gi'
-    assert_query_equal '.spec.template.spec.containers[0].env[3].name' "XR_VROUTER_DP_HUGEPAGE_MB"
-    assert_query_equal '.spec.template.spec.containers[0].env[3].value' "6144"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_VROUTER_DP_HUGEPAGE_MB"))][0][0].value' "6144"
+}
+
+@test "vRouter StatefulSet: runtimeClassName can be set" {
+    template --set 'runtimeClassName=foo'
+    assert_query_equal '.spec.template.spec.runtimeClassName' "foo"
 }
 
 @test "vRouter StatefulSet: XR_VROUTER_CP_CPUSET and XR_VROUTER_DP_CPUSET can be set" {
@@ -374,73 +403,85 @@ setup_file () {
     assert_error_message_contains "controlPlaneCpuCount must not be set if controlPlaneCpuset and dataPlaneCpuset are set"
 }
 
-@test "vRouter StatefulSet: hyperThreadingMode can't be specified if controlPlaneCpuset and dataPlaneCpuset are" {
-    template_failure --set 'cpu.hyperThreadingMode=off' \
-        --set 'cpu.controlPlaneCpuset=foo'\
-        --set 'cpu.dataPlaneCpuset=bar'
-    assert_error_message_contains "hyperThreadingMode must not be set if controlPlaneCpuset and dataPlaneCpuset are set"
-}
-
 @test "vRouter StatefulSet: hyperthreading mode container env var can be set" {
-    template --set 'cpu.hyperThreadingMode=off'
-    assert_query_equal '.spec.template.spec.containers[0].env[4].name' "XR_VROUTER_HT_MODE"
-    assert_query_equal '.spec.template.spec.containers[0].env[4].value' "off"
+    template --set 'cpu.hyperThreadingMode=pairs'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_VROUTER_HT_MODE"))][0][0].value' "pairs"
 }
 
 @test "vRouter StatefulSet: PCI driver container env var can be set" {
     template --set 'pciDriver=vfio-pci'
-    assert_query_equal '.spec.template.spec.containers[0].env[4].name' "XR_VROUTER_PCI_DRIVER"
-    assert_query_equal '.spec.template.spec.containers[0].env[4].value' "vfio-pci"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_VROUTER_PCI_DRIVER"))][0][0].value' "vfio-pci"
 }
 
 @test "vRouter StatefulSet: XR_INTERFACES container env vars is correctly set" {
-    template --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}}, {"type": "pci", "config": {"device": "11:11.1"}}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "pci:00:00.0;pci:11:11.1"
+    template --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}}, {"type": "sriov", "resource": "foo/bar"}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "pci:00:00.0;net-attach-def:default/release-name-xrd-vrouter-0"
 }
 
-@test "vRouter StatefulSet: XR_INTERFACES doesn't support any flags currently" {
+@test "vRouter StatefulSet: XR_INTERFACES container env vars is correctly set (sriov) with name override" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo/bar"}]' \
+       --set 'fullnameOverride=xrd-test'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_INTERFACES"))][0][0].value' "net-attach-def:default/xrd-test-0"
+}
+
+@test "vRouter StatefulSet: pci XR_INTERFACES don't support any flags currently" {
     template_failure --set-json 'interfaces=[{"type": "pci", "config": {"device": "00:00.0"}, "chksum": true}]'
+    assert_error_message_contains "Additional property chksum is not allowed"
+}
+
+@test "vRouter StatefulSet: sriov XR_INTERFACES don't support any flags currently" {
+    template_failure --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "chksum": true}]'
     assert_error_message_contains "Additional property chksum is not allowed"
 }
 
 @test "vRouter StatefulSet: XR_MGMT_INTERFACES container env vars is correctly set" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' "linux:net1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0"
+}
+
+@test "vRouter StatefulSet: XR_MGMT_INTERFACES container env vars is correctly set when sriov interface is present" {
+    template --set-json 'mgmtInterfaces=[{"type": "multus"}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "foo/bar"}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1"
+}
+
+@test "vRouter StatefulSet: XR_MGMT_INTERFACES container env vars is correctly for sriov mgmt interface when sriov interface is present" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo"}]' \
+        --set-json 'interfaces=[{"type": "sriov", "resource": "bar"}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net1"
 }
 
 @test "vRouter StatefulSet: set snoopIpv4Address flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv4Address": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' "linux:net1,snoop_v4"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v4"
 }
 
 @test "vRouter StatefulSet: set snoopIpv4DefaultRoot flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv4DefaultRoute": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' "linux:net1,snoop_v4_default_route"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v4_default_route"
 }
 
 @test "vRouter StatefulSet: set snoopIpv6Address flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv6Address": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' "linux:net1,snoop_v6"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v6"
 }
 
 @test "vRouter StatefulSet: set snoopIpv6DefaultRoot flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "snoopIpv6DefaultRoute": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' "linux:net1,snoop_v6_default_route"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,snoop_v6_default_route"
 }
 
 @test "vRouter StatefulSet: set chksum flag in XR_MGMT_INTERFACES" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "chksum": true}]'
-    assert_query_equal '.spec.template.spec.containers[0].env[2].name' "XR_MGMT_INTERFACES"
-    assert_query_equal '.spec.template.spec.containers[0].env[2].value' "linux:net1,chksum"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,chksum"
 }
 
-@test "vRouter StatefulSet: xrName flag  is not allowed for vRouter" {
+@test "vRouter StatefulSet: set chksum flag in XR_MGMT_INTERFACES for sriov interface" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo", "chksum": true}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_MGMT_INTERFACES"))][0][0].value' "linux:net0,chksum"
+}
+
+@test "vRouter StatefulSet: xrName flag is not allowed for vRouter" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "multus", "xrName": "foo"}]'
     assert_error_message_contains "xrName may not be specified for interfaces on XRd vRouter"
 }
@@ -450,56 +491,57 @@ setup_file () {
     assert_error_message_contains "Additional property foo is not allowed"
 }
 
+@test "vRouter StatefulSet: XR_NETWORK_STATUS_ANNOTATION_PATH is not set by default" {
+    template
+    assert_query '[.spec.template.spec.containers[0].env | map(select(.name == "XR_NETWORK_STATUS_ANNOTATION_PATH"))][0][0] | not'
+}
+
+@test "vRouter StatefulSet: XR_NETWORK_STATUS_ANNOTATION_PATH is set when there is an sriov network" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_NETWORK_STATUS_ANNOTATION_PATH"))][0][0].value' "/etc/xrd/network-status/network-status-annotation"
+}
+
 @test "vRouter StatefulSet: XR_DISK_USAGE_LIMIT is set if persistence is enabled with default value" {
     template --set 'persistence.enabled=true'
-    assert_query_equal '.spec.template.spec.containers[0].env[0].name' "XR_DISK_USAGE_LIMIT"
-    assert_query_equal '.spec.template.spec.containers[0].env[0].value' "6G"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_DISK_USAGE_LIMIT"))][0][0].value' "6G"
 }
 
 @test "vRouter StatefulSet: value of XR_DISK_USAGE_LIMIT can be set" {
     template --set 'persistence.enabled=true' --set 'persistence.size=123kb'
-    assert_query_equal '.spec.template.spec.containers[0].env[0].name' "XR_DISK_USAGE_LIMIT"
-    assert_query_equal '.spec.template.spec.containers[0].env[0].value' "123K"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_DISK_USAGE_LIMIT"))][0][0].value' "123K"
 }
 
 @test "vRouter StatefulSet: XR_FIRST_BOOT_CONFIG is set if config is to be applied on first boot" {
     template --set 'config.username=foo' --set 'config.password=bar'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_FIRST_BOOT_CONFIG"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "/etc/xrd/startup.cfg"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_FIRST_BOOT_CONFIG"))][0][0].value' "/etc/xrd/startup.cfg"
 }
 
 @test "vRouter StatefulSet: XR_EVERY_BOOT_CONFIG is set if ascii config is to be applied on every boot" {
     template --set 'config.ascii=foo' --set 'config.asciiEveryBoot=true'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_EVERY_BOOT_CONFIG"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "/etc/xrd/startup.cfg"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_EVERY_BOOT_CONFIG"))][0][0].value' "/etc/xrd/startup.cfg"
 }
 
 @test "vRouter StatefulSet: XR_ZTP_ENABLE can be set" {
     template --set 'config.ztpEnable=true'
-    assert_query_equal '.spec.template.spec.containers[0].env[4].name' "XR_ZTP_ENABLE"
-    assert_query_equal '.spec.template.spec.containers[0].env[4].value' "1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_ZTP_ENABLE"))][0][0].value' "1"
 }
 
 @test "vRouter StatefulSet: XR_ZTP_INI can be set" {
     template --set 'config.ztpEnable=true' --set 'config.ztpIni=foo'
-    assert_query_equal '.spec.template.spec.containers[0].env[4].name' "XR_ZTP_ENABLE"
-    assert_query_equal '.spec.template.spec.containers[0].env[4].value' "1"
-    assert_query_equal '.spec.template.spec.containers[0].env[5].name' "XR_ZTP_ENABLE_WITH_INI"
-    assert_query_equal '.spec.template.spec.containers[0].env[5].value' "/etc/xrd/ztp.ini"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_ZTP_ENABLE"))][0][0].value' "1"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_ZTP_ENABLE_WITH_INI"))][0][0].value' "/etc/xrd/ztp.ini"
 }
 
 @test "vRouter StatefulSet: advanced settings can be used to add env vars" {
     template --set 'advancedSettings.FOO=bar'
-    assert_query_equal '.spec.template.spec.containers[0].env[0].name' "FOO"
-    assert_query_equal '.spec.template.spec.containers[0].env[0].value' "bar"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "FOO"))][0][0].value' "bar"
 }
 
 @test "vRouter StatefulSet: advanced settings can be used to override default settings" {
     template \
         --set 'config.ascii=foo' \
         --set 'advancedSettings.XR_FIRST_BOOT_CONFIG=foo'
-    assert_query_equal '.spec.template.spec.containers[0].env[1].name' "XR_FIRST_BOOT_CONFIG"
-    assert_query_equal '.spec.template.spec.containers[0].env[1].value' "foo"
+    assert_query_equal '[.spec.template.spec.containers[0].env | map(select(.name == "XR_FIRST_BOOT_CONFIG"))][0][0].value' "foo"
 }
 
 @test "vRouter StatefulSet: no container volumeMounts by default" {
@@ -540,6 +582,12 @@ setup_file () {
     template --set-json 'extraVolumeMounts[0]={"mountPath": "foo", "name": "bar"}'
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "foo"
     assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "bar"
+}
+
+@test "vRouter StatefulSet: network-status annotation is mounted if there is sriov network" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo"}]'
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].mountPath' "/etc/xrd/network-status"
+    assert_query_equal '.spec.template.spec.containers[0].volumeMounts[0].name' "network-status-annotation"
 }
 
 @test "vRouter StatefulSet: container imagePullSecrets can be set" {
