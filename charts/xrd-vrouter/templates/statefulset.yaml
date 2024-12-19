@@ -53,6 +53,11 @@ Construct the resources including the default if that resource wasn't specified.
 {{- $hugepageMb := include "xrd.toMiB" $hugepageSize }}
 {{- $_ := set $env "XR_VROUTER_DP_HUGEPAGE_MB" $hugepageMb  }}
 
+{{- /* Generate PROFILE env var */}}
+{{- if .Values.profile }}
+  {{- $_ := set $env "XR_VROUTER_PROFILE" .Values.profile }}
+{{- end }}
+
 {{- /* Generate CPU env vars */}}
 {{- if .Values.cpu }}
   {{- with .Values.cpu}}
@@ -68,9 +73,6 @@ Construct the resources including the default if that resource wasn't specified.
       {{- end }}
       {{- if .controlPlaneCpuCount }}
         {{- fail "controlPlaneCpuCount must not be set if controlPlaneCpuset and dataPlaneCpuset are set" }}
-      {{- end }}
-       {{- if .hyperThreadingMode }}
-        {{- fail "hyperThreadingMode must not be set if controlPlaneCpuset and dataPlaneCpuset are set" }}
       {{- end }}
       {{- $_ := set $env "XR_VROUTER_DP_CPUSET" .dataPlaneCpuset }}
       {{- $_ := set $env "XR_VROUTER_CP_CPUSET" .controlPlaneCpuset }}
@@ -95,6 +97,9 @@ Construct the resources including the default if that resource wasn't specified.
 {{- /* Generate the interface env vars */}}
 {{- $_ = set $env "XR_INTERFACES" (include "xrd-vr.interfaces" .) }}
 {{- $_ = set $env "XR_MGMT_INTERFACES" (include "xrd-vr.mgmtInterfaces" .) }}
+{{- if (include "xrd.mountNetworkStatusAnnotation" .) }}
+  {{- $_ = set $env "XR_NETWORK_STATUS_ANNOTATION_PATH" "/etc/xrd/network-status/network-status-annotation" }}
+{{- end }}
 
 {{- /* Create the args dict and invoke the generic template. */}}
 {{- $args := dict "root" $ "resources" $resources "environment" $env }}

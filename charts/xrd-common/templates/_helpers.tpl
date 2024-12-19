@@ -107,3 +107,14 @@ Convert a k8s resource specification of Mi or Gi into MiB for XR env vars.
 {{- end -}}
 {{ $out }}
 {{- end -}}
+
+{{- /*
+Should the NetworkStatusAnnotation be mounted?
+Returns a string equivalent to boolean true if there are any sriov data
+interfaces on vRouter, or an empty string otherwise.
+*/ -}}
+{{- define "xrd.mountNetworkStatusAnnotation" -}}
+{{- if and (include "xrd.interfaces.anySRIOVData" .) (eq .Chart.Name "xrd-vrouter")  }}
+1
+{{- end }}
+{{- end -}}

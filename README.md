@@ -10,6 +10,10 @@ There are two application charts provided in this repository:
 There is also a library chart provided, xrd-common, that is used by both
 of the application charts.
 
+See [CHANGELOG.md](./CHANGELOG.md) for a record of changes that have been made.
+
+See [version-compatibility.md](./version-compatibility.md) for the compatibility statement across versions.
+
 ## Usage
 
 [Helm](https://helm.sh) must be installed to use the charts. Please refer to

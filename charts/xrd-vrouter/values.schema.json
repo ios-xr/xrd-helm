@@ -81,6 +81,10 @@
       "description": "Annotations added to the XRd deployment",
       "type": "object"
     },
+    "serviceAccountName": {
+      "description": "Name of the service account to use for the XRd pod",
+      "type": "string"
+    },
     "resources": {
       "description": "Standard Kubernetes container resources object",
       "type": "object"
@@ -254,11 +258,16 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. Must be 'pci'",
+            "description": "Underlying interface type. Must be 'pci' or 'sriov'",
             "type": "string",
             "enum": [
-              "pci"
+              "pci",
+              "sriov"
             ]
+          },
+          "resource": {
+            "description": "Network resource to use for the interface",
+            "type": "string"
           },
           "config": {
             "description": "Type-dependent configuration",
@@ -278,11 +287,12 @@
         "type": "object",
         "properties": {
           "type": {
-            "description": "Underying interface type. One of: 'defaultCni' or 'multus'",
+            "description": "Underlying interface type. One of: 'defaultCni', 'multus' or 'sriov'",
             "type": "string",
             "enum": [
               "defaultCni",
-              "multus"
+              "multus",
+              "sriov"
             ]
           },
           "config": {
@@ -292,6 +302,10 @@
           "attachmentConfig": {
             "description": "Network attachment annotation configuration, for multus-type interfaces only",
             "type": "object"
+          },
+          "resource": {
+            "description": "SR-IOV resource-pool name, for sriov-type interfaces only",
+            "type": "string"
           },
           "snoopIpv4Address": {
             "description": "Indicate whether to snoop the pre-existing IPv4 address of the interface into XR config",
@@ -329,6 +343,18 @@
         "additionalProperties": false
       }
     },
+    "profile": {
+      "description": "XRd vRouter profile",
+      "type": "string",
+      "enum": [
+        "vpe",
+        "vrr"
+      ]
+    },
+    "runtimeClassName": {
+      "description": "Runtime Class name for the XRd pod",
+      "type": "string"
+    },
     "cpu": {
       "description": "CPU settings",
       "type": "object",
@@ -353,7 +379,7 @@
           "description": "HyperThreading mode for cpuset allocations",
           "type": "string",
           "enum": [
-            "off",
+            "auto",
             "pairs"
           ],
           "default": "off"
