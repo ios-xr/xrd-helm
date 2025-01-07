@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 # This script runs all commit checks EXCEPT for checking that the version is
-# correctly incermented, which is done via a seperate github action.
+# correctly incremented, which is done via a separate github action.
 
 set -e
 
+# shellcheck disable=SC2317
 function cleanup()
 {
     echo
