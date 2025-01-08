@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 # This script runs all commit checks EXCEPT for checking that the version is
-# correctly incermented, which is done via a seperate github action.
+# correctly incremented, which is done via a separate github action.
 
 set -e
 
+# shellcheck disable=SC2317
 function cleanup()
 {
     echo
@@ -68,7 +69,7 @@ podman build tests/ -t helm-tests --network host
 
 echo
 echo "Running host-check unit tests..."
-if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/host-check; then
+if ! podman run --rm -v "$PWD/:/charts" helm-tests bats tests/ut/host-check; then
     echo "host-check unit tests failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
 else
@@ -77,7 +78,7 @@ fi
 
 echo
 echo "Running Control Plane unit tests..."
-if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
+if ! podman run --rm -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-control-plane; then
     echo "Control Plane unit tests failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
 else
@@ -86,7 +87,7 @@ fi
 
 echo
 echo "Running vRouter unit tests..."
-if ! podman run -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
+if ! podman run --rm -v "$PWD/:/charts" helm-tests bats tests/ut/xrd-vrouter; then
     echo "vRouter unit tests failed, check output and fix issues." >&2
     FAILURES=$((FAILURES+1))
 else
