@@ -66,7 +66,7 @@ or an empty string otherwise.
 
 {{- define "xrd.interfaces.linuxflags" -}}
 {{- $flags := list }}
-{{- $base := list "type" "config" "attachmentConfig" "resource" }}
+{{- $base := list "type" "config" "attachmentConfig" "resource" "additionalCNIConfig" }}
 {{- range $k, $v := . -}}
   {{- if eq $k "snoopIpv4Address" }}
     {{- if $v }}
@@ -113,7 +113,7 @@ or an empty string otherwise.
 
 {{- define "xrd.interfaces.sriovflags" -}}
 {{- $flags := list }}
-{{- $base := list "type" "config" "resource" }}
+{{- $base := list "type" "config" "resource" "additionalCNIConfig" }}
 {{- range $k, $v := . -}}
   {{- if not (has $k $base) }}
     {{- fail (printf "%s may not be specified for sriov interfaces" $k) }}
