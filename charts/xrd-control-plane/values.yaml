@@ -204,6 +204,10 @@ config:
 # linux interface is found, and XR configuration for that IPv4 address
 # on the corresponding XR interface is generated and applied on XRd startup.
 #
+# On 'sriov' and 'multus' interfaces and management interfaces, config for
+# additional CNI plugins can be specified under the 'additionalCNIConfig' field.
+# This is a list of CNI plugin configurations to be applied in order.
+#
 # XRd line interfaces.
 interfaces: []
 # Example interfaces:
@@ -217,6 +221,17 @@ interfaces: []
 #  config:
 #    type: sriov
 #    vlan: 1
+#- type: sriov
+#  resource: intel.com/intel_sriov_netdevice_2
+#  config:
+#    type: sriov
+#    vlan: 1
+#  additionalCNIConfig:
+#  - type: tuning
+#    capabilities:
+#      mac: true
+#    allmulti: true
+#    promisc: true
 
 # XRd management interfaces.
 mgmtInterfaces: []
@@ -236,7 +251,7 @@ mgmtInterfaces: []
 #    ips:
 #    - "10.0.0.1/24"
 #- type: sriov
-#  resource: intel.com/intel_sriov_netdevice_2
+#  resource: intel.com/intel_sriov_netdevice_3
 #  config:
 #    type: sriov
 
