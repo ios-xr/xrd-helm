@@ -24,9 +24,7 @@ spec:
     {
       "cniVersion": "0.3.1",
       "name": "{{ include "xrd.fullname" $ }}-{{ $cniIndex }}",
-      "plugins": [
-        {{- $intf.config | toPrettyJson | nindent 8 }}
-      ]
+      "plugins": {{- prepend ( $intf.additionalCNIConfig | default list ) $intf.config | toPrettyJson | nindent 8 }}
     }
 ...
 {{- $cniIndex = add1 $cniIndex}}

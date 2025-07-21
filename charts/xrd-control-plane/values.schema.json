@@ -270,6 +270,13 @@
             "description": "Type-dependent configuration",
             "type": "object"
           },
+          "additionalCNIConfig": {
+            "description": "Config for additional CNI pluginsm for multus and sriov-type interfaces only",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
+          },
           "attachmentConfig": {
             "description": "Network attachment annotation configuration, for multus-type interfaces only",
             "type": "object"
@@ -332,6 +339,13 @@
           "config": {
             "description": "Type-dependent configuration",
             "type": "object"
+          },
+          "additionalCNIConfig": {
+            "description": "Config for additional CNI pluginsm for multus and sriov-type interfaces only",
+            "type": "array",
+            "items": {
+              "type": "object"
+            }
           },
           "attachmentConfig": {
             "description": "Network attachment annotation configuration, for multus-type interfaces only",

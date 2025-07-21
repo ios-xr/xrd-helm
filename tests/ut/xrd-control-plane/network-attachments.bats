@@ -72,19 +72,19 @@ setup_file () {
 @test "Control Plane NetworkAttachmentDefinition: Check default config" {
     template --set-json 'interfaces=[{"type": "multus"}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\": [\n    null\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      null\n    ]\n}"
 }
 
 @test "Control Plane NetworkAttachmentDefinition: Config can be set for MGMT interfaces" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}}]'
     assert_query_equal '.spec.config'\
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      }\n    ]\n}"
 }
 
 @test "Control Plane NetworkAttachmentDefinition: Config can be set for interfaces" {
     template --set-json 'interfaces=[{"type": "multus", "config": {"foo": "bar"}}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      }\n    ]\n}"
 }
 
 @test "Control Plane NetworkAttachmentDefinition: No interfaces" {
@@ -180,7 +180,7 @@ setup_file () {
 @test "Control Plane NetworkAttachmentDefinition (sriov): Config can be set" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\": [\n    {\n      \"type\": \"sriov\"\n    }\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      }\n    ]\n}"
 }
 
 @test "Control Plane NetworkAttachmentDefinition: multiple sriov interfaces can be created together" {
@@ -200,4 +200,52 @@ setup_file () {
     template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
     assert_query_equal '.metadata.name' \
         "release-name-xrd-control-plane-0"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Additional CNI config can be set" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}, "additionalCNIConfig": [{"bar": "baz"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      },\n      {\n        \"bar\": \"baz\"\n      }\n    ]\n}"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov): Multiple additional CNI config can be set" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}, "additionalCNIConfig": [{"bar": "baz"}, {"qux": "quux"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      },\n      {\n        \"bar\": \"baz\"\n      },\n      {\n        \"qux\": \"quux\"\n      }\n    ]\n}"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov mgmt): Additional CNI config can be set" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}, "additionalCNIConfig": [{"bar": "baz"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      },\n      {\n        \"bar\": \"baz\"\n      }\n    ]\n}"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (sriov mgmt): Multiple additional CNI config can be set" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}, "additionalCNIConfig": [{"bar": "baz"}, {"qux": "quux"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      },\n      {\n        \"bar\": \"baz\"\n      },\n      {\n        \"qux\": \"quux\"\n      }\n    ]\n}"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (multus): Additional CNI config can be set" {
+    template --set-json 'interfaces=[{"type": "multus", "config": {"foo": "bar"}, "additionalCNIConfig": [{"baz": "qux"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      },\n      {\n        \"baz\": \"qux\"\n      }\n    ]\n}"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (multus): Multiple additional CNI config can be set" {
+    template --set-json 'interfaces=[{"type": "multus", "config": {"foo": "bar"}, "additionalCNIConfig": [{"baz": "qux"}, {"quux": "corge"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      },\n      {\n        \"baz\": \"qux\"\n      },\n      {\n        \"quux\": \"corge\"\n      }\n    ]\n}"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (multus mgmt): Additional CNI config can be set" {
+    template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}, "additionalCNIConfig": [{"baz": "qux"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      },\n      {\n        \"baz\": \"qux\"\n      }\n    ]\n}"
+}
+
+@test "Control Plane NetworkAttachmentDefinition (multus mgmt): Multiple additional CNI config can be set" {
+    template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}, "additionalCNIConfig": [{"baz": "qux"}, {"quux": "corge"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-control-plane-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      },\n      {\n        \"baz\": \"qux\"\n      },\n      {\n        \"quux\": \"corge\"\n      }\n    ]\n}"
 }

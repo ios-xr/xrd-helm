@@ -11,6 +11,9 @@
     {{- if hasKey . "attachmentConfig" }}
       {{- fail "attachmentConfig may not be specified for PCI interfaces" }}
     {{- end }}
+    {{- if hasKey . "additionalCNIConfig" }}
+      {{- fail "additionalCNIConfig may not be specified for PCI interfaces" }}
+    {{- end }}
     {{- if hasKey . "resource" }}
       {{- fail "resource may not be specified for PCI interfaces" }}
     {{- end }}
@@ -87,6 +90,9 @@
   {{- if eq .type "defaultCni" }}
     {{- if hasKey . "attachmentConfig" }}
       {{- fail "attachmentConfig may not be specified for defaultCni mgmt interface types" }}
+    {{- end }}
+    {{- if hasKey . "additionalCNIConfig" }}
+      {{- fail "additionalCNIConfig may not be specified for PCI interfaces" }}
     {{- end }}
     {{- if (hasKey . "xrName") }}
       {{- fail "xrName may not be specified for interfaces on XRd vRouter" }}

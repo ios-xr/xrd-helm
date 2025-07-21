@@ -66,13 +66,13 @@ setup_file () {
 @test "vRouter NetworkAttachmentDefinition (multus): Check default config" {
     template --set-json 'mgmtInterfaces=[{"type": "multus"}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\": [\n    null\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      null\n    ]\n}"
 }
 
 @test "vRouter NetworkAttachmentDefinition (multus): Config can be set" {
     template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\": [\n    {\n      \"foo\": \"bar\"\n    }\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      }\n    ]\n}"
 }
 
 @test "vRouter NetworkAttachmentDefinition (sriov): Name consists of the release name, template name and index" {
@@ -133,7 +133,7 @@ setup_file () {
 @test "vRouter NetworkAttachmentDefinition (sriov): Config can be set" {
     template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}}]'
     assert_query_equal '.spec.config' \
-        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\": [\n    {\n      \"type\": \"sriov\"\n    }\n  ]\n}"
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      }\n    ]\n}"
 }
 
 @test "vRouter NetworkAttachmentDefinition: multiple sriov interfaces can be created together" {
@@ -191,4 +191,40 @@ setup_file () {
 @test "vRouter NetworkAttachmentDefinition: error if unknown mgmt interface type is requested" {
     template_failure --set-json 'mgmtInterfaces=[{"type": "foo"}]'
     assert_error_message_contains "must be one of the following: \"defaultCni\", \"multus\", \"sriov\""
+}
+
+@test "vRouter NetworkAttachmentDefinition (sriov): Additional CNI config can be set" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}, "additionalCNIConfig": [{"bar": "baz"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      },\n      {\n        \"bar\": \"baz\"\n      }\n    ]\n}"
+}
+
+@test "vRouter NetworkAttachmentDefinition (sriov): Multiple additional CNI config can be set" {
+    template --set-json 'interfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}, "additionalCNIConfig": [{"bar": "baz"}, {"qux": "quux"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      },\n      {\n        \"bar\": \"baz\"\n      },\n      {\n        \"qux\": \"quux\"\n      }\n    ]\n}"
+}
+
+@test "vRouter NetworkAttachmentDefinition (sriov mgmt): Additional CNI config can be set" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}, "additionalCNIConfig": [{"bar": "baz"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      },\n      {\n        \"bar\": \"baz\"\n      }\n    ]\n}"
+}
+
+@test "vRouter NetworkAttachmentDefinition (sriov mgmt): Multiple additional CNI config can be set" {
+    template --set-json 'mgmtInterfaces=[{"type": "sriov", "resource": "foo", "config": {"type": "sriov"}, "additionalCNIConfig": [{"bar": "baz"}, {"qux": "quux"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      {\n        \"type\": \"sriov\"\n      },\n      {\n        \"bar\": \"baz\"\n      },\n      {\n        \"qux\": \"quux\"\n      }\n    ]\n}"
+}
+
+@test "vRouter NetworkAttachmentDefinition (multus): Additional CNI config can be set" {
+    template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}, "additionalCNIConfig": [{"baz": "qux"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      },\n      {\n        \"baz\": \"qux\"\n      }\n    ]\n}"
+}
+
+@test "vRouter NetworkAttachmentDefinition (multus): Multiple additional CNI config can be set" {
+    template --set-json 'mgmtInterfaces=[{"type": "multus", "config": {"foo": "bar"}, "additionalCNIConfig": [{"baz": "qux"}, {"quux": "corge"}]}]'
+    assert_query_equal '.spec.config' \
+        "{\n  \"cniVersion\": \"0.3.1\",\n  \"name\": \"release-name-xrd-vrouter-0\",\n  \"plugins\":\n    [\n      {\n        \"foo\": \"bar\"\n      },\n      {\n        \"baz\": \"qux\"\n      },\n      {\n        \"quux\": \"corge\"\n      }\n    ]\n}"
 }
